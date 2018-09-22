@@ -35,19 +35,19 @@ export default {
     handleSignin() {
       if (!this.account )
         return this.$vux.toast.text("请填写手机号码", "middle");
-      // axios
-      //   .post("/wx/saveBind", {
-      //     account: this.account,
-      //     validCode: this.validCode
-      //   })
-      //   .then(res => {
-      //     console.log(res);
-      //     this.$router.push({ name: "SignSuccess" });
-      //   })
-      //   .catch(e => {
-      //     console.log(e.response.data);
-      //     this.$vux.toast.text(e.response.data.msg, "middle");
-      //   });
+      axios
+        .post("/wx/saveBind", {
+          account: this.account,
+          validCode: this.validCode
+        })
+        .then(res => {
+          console.log(res);
+          this.$router.push({ name: "SignSuccess" });
+        })
+        .catch(e => {
+          console.log(e.response.data);
+          this.$vux.toast.text(e.response.data.msg, "middle");
+        });
     }
   }
 };

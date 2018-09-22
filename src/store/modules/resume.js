@@ -1,6 +1,7 @@
 // initial state
 const state = {
-  resume: {}
+  resume: {},
+  isToastShow:false,
 }
 
 // getters
@@ -17,6 +18,9 @@ const actions = {
 const mutations = {
   setResume(state, resume) {
     state.resume = resume
+  },
+  setIsToastShow(state, isToastShow) {
+    state.isToastShow = isToastShow
   },
 
   // decrementProductInventory (state, { id }) {

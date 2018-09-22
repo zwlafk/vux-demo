@@ -3,9 +3,9 @@ import App from './App'
 import router from './router'
 import store from './store'
 import { ToastPlugin } from 'vux'
+import  './init.js'
 
 Vue.use(ToastPlugin)
-
 Vue.config.productionTip = false
 // Vue.use(VueRouter)
 
