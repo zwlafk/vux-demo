@@ -17,7 +17,7 @@ const webpackConfig = {
       : config.dev.assetsPublicPath
   },
   resolve: {
-    extensions: ['.js', '.vue', '.json','.less'],
+    extensions: ['.js', '.vue', '.json', '.less'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
@@ -75,9 +75,16 @@ const webpackConfig = {
   }
 }
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 
 
-module.exports = vuxLoader.merge(webpackConfig, { plugins: ['vux-ui'] })
+module.exports = vuxLoader.merge(webpackConfig, {
+  plugins: [
+    'vux-ui',
+    {
+      name: 'less-theme',
+      path: 'src/assets/style/theme.less'
+    }]
+})

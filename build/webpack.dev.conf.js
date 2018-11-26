@@ -42,7 +42,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
-    }
+    },
+    disableHostCheck: true
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -63,6 +64,11 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         from: path.resolve(__dirname, '../static'),
         to: config.dev.assetsSubDirectory,
         ignore: ['.*']
+      },
+      {
+        from: path.resolve(__dirname, '../static/WW_verify_8ocsL2HqKAyGwbf9.txt'),
+        to: 'WW_verify_8ocsL2HqKAyGwbf9.txt',
+        toType: 'file'
       }
     ])
   ]

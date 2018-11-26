@@ -1,0 +1,69 @@
+// global style
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+dl,
+dd,
+dt {
+  margin: 0
+}
+html,body{
+  height: 100%
+}
+// dd,dt {
+//   display: inline-block;
+// }
+// group without margin-top
+.group-nomargintop {
+  .weui-cells {
+    margin-top: 0
+  }
+}
+
+// vertical tab
+.vertical-tab {
+  .vux-tab-container {
+    height: auto;
+    .vux-tab {
+      flex-direction: column;
+      height: auto;
+    }
+  }
+}
+
+// group-cell-without-border
+.group-cell-without-border {
+  .weui-cell:before {
+    border-width: 0;
+  }
+}
+
+// cell with btn title
+.cell-btntitle {
+  .vux-cell-primary {
+    >p {
+      position: relative;
+      .cell-titlebtn-pullright {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+    }
+  }
+}
+
+
+.tabbar-btn-group{
+    .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon, .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon > i, .weui-tabbar__item.weui-bar__item_on .weui-tabbar__label{
+      color: unset;
+    }
+}
+
+
+.height-block {
+  height: 50px;
+}
