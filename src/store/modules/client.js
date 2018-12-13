@@ -9,11 +9,11 @@ const getters = {}
 
 // actions
 const actions = {
-  getCurrentClient({ commit }) {
+  setCurrentClient({ commit },currentClient) {
     commit('setCurrentClient', currentClient)
   },
-  getParams({ commit }) {
-    commit('setParams', parpms)
+  setParams({ commit },params) {
+    commit('setParams', params)
   }
 }
 
@@ -22,7 +22,7 @@ const mutations = {
   setCurrentClient(state, currentClient) {
     state.currentClient = currentClient
   },
-  setParams(state, Params) {
+  setParams(state, params) {
     state.params = { ...state.params, ...params }
   },
 }

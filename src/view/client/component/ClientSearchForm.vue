@@ -1,81 +1,66 @@
-<template  >
+<template>
   <div class="client-search-form">
-    <div class="mask"
-         v-if="isMaskShow"
-         @click="isFilterShow=false,isSorterShow=false">
-    </div>
+    <div class="mask" v-if="isMaskShow" @click="isFilterShow=false,isSorterShow=false"></div>
     <group class="group-nomargintop">
-      <search v-model="srarchText"
-              ref="search"
-              @on-result-click="handleSearch"
-              :results="searchResult">
-      </search>
+      <search
+        v-model="srarchText"
+        ref="search"
+        @on-result-click="handleSearch"
+        :results="searchResult"
+      ></search>
     </group>
     <flexbox :gutter="0">
       <flexbox-item>
-        <x-button @click.native="isFilterShow=!isFilterShow,isSorterShow=false,initCurrentFilterOption()">筛选 ▾</x-button>
+        <x-button @click.native="isFilterShow=!isFilterShow,isSorterShow=false">筛选 ▾</x-button>
       </flexbox-item>
       <flexbox-item>
         <x-button @click.native="isSorterShow=!isSorterShow,isFilterShow=false">排序 ▾</x-button>
       </flexbox-item>
     </flexbox>
-    <div class="filter"
-         v-if="isFilterShow">
-      <div class="filter-content"
-           style="display: flex;flex: 1;">
-        <tab class="vertical-tab filter-form-tab"
-             custom-bar-width="0">
-          <tab-item v-for="(item,index) in fieldList"
-                    :selected="index==0"
-                    @on-item-click="handleTabItemClick(item,index)"
-                    :key="item.id">
-            {{item.searchName}}
-          </tab-item>
+    <div class="filter" v-if="isFilterShow">
+      <div class="filter-content" style="display: flex;flex: 1;">
+        <tab class="vertical-tab filter-form-tab" custom-bar-width="0">
+          <tab-item
+            v-for="(item,index) in fieldList"
+            :selected="index==0"
+            @on-item-click="handleTabItemClick(item,index)"
+            :key="item.id"
+          >{{item.searchName}}</tab-item>
         </tab>
         <div class="filter-form-content">
-          <!-- <template v-for="(item,index) in fieldList">
-              <FilterItem v-show="CurrentfilterOption.developCode==item.developCode"
-                          v-model="filterFormData[item.searchCode]"
-                          :shouldClear="shouldClear"
-                          :key="index"
-                          v-bind="item"
-                          :searchName="item.searchName"
-                          :childrenList="item.childList"
-                          :dataType="item.dataType"></FilterItem>
-            </template> -->
+          <group>
+            <checklist v-show="filterName=='custStatus'" :max="1" :options="custStatusOptions"></checklist>
+            <checklist v-show="filterName=='source'" :max="1" :options="sourceOptions"></checklist>
+          </group>
         </div>
-        <!-- <FilterGenerator class="filter-form-content"
-                             :formFieldList="fieldList"
-                             :option="CurrentfilterOption"></FilterGenerator> -->
-        <!-- <div>{{CurrentfilterOption}}</div> -->
       </div>
       <div class="filter-footer">
-        <x-button mini
-                  type="primary"
-                  @click.native="handleFilterReset">重置</x-button>
-        <x-button mini
-                  type="primary"
-                  @click.native="handleFilterSubmit">确定</x-button>
+        <x-button mini type="primary" @click.native="handleFilterReset">重置</x-button>
+        <x-button mini type="primary" @click.native="handleFilterSubmit">确定</x-button>
       </div>
     </div>
-    <div class="sorter"
-         v-if="isSorterShow">
-      <tab class="vertical-tab"
-           custom-bar-width="0">
-        <tab-item v-for="(item,index) in sorterOptionList"
-                  :selected="index==sorterSelectedIndex"
-                  @on-item-click="handleSorterItemClick(index)"
-                  :key="item.id">{{item.text}}</tab-item>
+    <div class="sorter" v-if="isSorterShow">
+      <tab class="vertical-tab" custom-bar-width="0">
+        <tab-item
+          v-for="(item,index) in sorterOptionList"
+          :selected="index==sorterSelectedIndex"
+          @on-item-click="handleSorterItemClick(index)"
+          :key="item.id"
+        >{{item.text}}</tab-item>
       </tab>
     </div>
     <!-- </transition> -->
   </div>
-
 </template>
 
 <script>
+import { createNamespacedHelpers } from 'vuex'
+
+const { mapState, mapActions } = createNamespacedHelpers('clientState')
+
 import api from "@/api/client";
 import {
+  Checklist,
   CellBox,
   Group,
   XInput,
@@ -92,6 +77,7 @@ import PopupChecklist from "@/components/PopupChecklist";
 export default {
   name: "ClientSearchForm",
   components: {
+    Checklist,
     Tab,
     TabItem,
     XButton,
@@ -112,13 +98,54 @@ export default {
     return {
       sorterSelectedIndex: 4, //默认按创建时间排序
       srarchText: "",
+      filterName: "custStatus",
       isFilterShow: false,
       isSorterShow: false,
-       // custStatus	String	客户状态： 1-资源 2-意向客户 3-签约客户
+      custStatusOptions: [
+        {
+          key: 1,
+          value: "资源"
+        },
+        {
+          key: 2,
+          value: "意向客户"
+        },
+        {
+          key: 3,
+          value: "签约客户"
+        }
+      ],
+      // custStatus	String	客户状态： 1-资源 2-意向客户 3-签约客户
       // saleProcessId	String	销售进程ID	/resource/custList/search - saleProcess
       // custTypeId 	String	客户类型	/resource/custList/search
       // resGroupId	String	资源分组ID  /resource/custList/search - resGroups
       // ownerAccsStr	String	所有者多个值使用 “，”号分割
+      sourceOptions: [
+        {
+          key: 1,
+          value: "自有导入"
+        },
+        {
+          key: 2,
+          value: "分配交接"
+        },
+        {
+          key: 3,
+          value: "公海取回"
+        },
+        {
+          key: 4,
+          value: "AI初筛"
+        },
+        {
+          key: 5,
+          value: "在线表单"
+        },
+        {
+          key: 6,
+          value: "数据合作"
+        }
+      ],
       // source	Integer	客户来源：1-自有导入，2-分配交接，3-公海取回，4-AI初筛，5-在线表单,6-数据合作
       // startActionDate	String	最近联系时间 【开始】 endActionDate	String	最近联系时间 【结束】
       // startDate	String	下次联系时间【开始】 endDate	String	下次联系时间【结束】
@@ -126,24 +153,66 @@ export default {
       // startSignDate	String	签约时间 【开始】 endSignDate	String	签约时间【结束】
       CurrentfilterOption: {},
       fieldList: [
-        { searchName: "客户状态" },
-        { searchName: "销售进程" },
-        { searchName: "客户类型" },
-        { searchName: "资源分组" },
-        { searchName: "所有者" },
-        { searchName: "客户来源" },
-        { searchName: "最近联系时间" },
-        { searchName: "下次联系时间" },
-        { searchName: "添加分配时间" },
-        { searchName: "签约时间" }
+        {
+          searchName: "客户状态",
+          name: "custStatus"
+        },
+        {
+          searchName: "销售进程",
+          name: "saleProcessId"
+        },
+        {
+          searchName: "客户类型",
+          name: "custTypeId"
+        },
+        {
+          searchName: "资源分组",
+          name: "resGroupId"
+        },
+        {
+          searchName: "所有者",
+          name: "ownerAccsStr"
+        },
+        {
+          searchName: "客户来源",
+          name: "source"
+        },
+        {
+          searchName: "最近联系时间",
+          name: "startActionDate"
+        },
+        {
+          searchName: "下次联系时间",
+          name: "startDate"
+        },
+        {
+          searchName: "添加分配时间",
+          name: "pstartDate"
+        },
+        {
+          searchName: "签约时间",
+          name: "startSignDate"
+        }
       ],
       sorterOptionList: [
-        { text: "按最近联系时间正序" }, //order:0
-        { text: "按最近联系时间倒序" }, //order:1
-        { text: "按下次联系时间正序" }, //order:2
-        { text: "按下次联系时间倒序" }, //order:3
-        { text: "按创建时间正序" }, //order:4
-        { text: "按创建时间倒序" } //order:5
+        {
+          text: "按最近联系时间正序"
+        }, //order:0
+        {
+          text: "按最近联系时间倒序"
+        }, //order:1
+        {
+          text: "按下次联系时间正序"
+        }, //order:2
+        {
+          text: "按下次联系时间倒序"
+        }, //order:3
+        {
+          text: "按创建时间正序"
+        }, //order:4
+        {
+          text: "按创建时间倒序"
+        } //order:5
       ]
     };
   },
@@ -166,11 +235,17 @@ export default {
         return [
           {
             title: `查找客户名称 "${this.srarchText}"`,
-            params: { queryText: this.srarchText, queryType: "name" }
+            params: {
+              queryText: this.srarchText,
+              queryType: "name"
+            }
           },
           {
             title: `查找联系电话 "${this.srarchText}"`,
-            params: { queryText: this.srarchText, queryType: "phone" }
+            params: {
+              queryText: this.srarchText,
+              queryType: "phone"
+            }
           }
         ];
       }
@@ -178,26 +253,48 @@ export default {
       return [
         {
           title: `查找客户姓名 "${this.srarchText}"`,
-          params: { queryText: this.srarchText, queryType: "name" }
+          params: {
+            queryText: this.srarchText,
+            queryType: "name"
+          }
         },
         {
           title: `查找联系电话 "${this.srarchText}"`,
-          params: { queryText: this.srarchText, queryType: "phone" }
+          params: {
+            queryText: this.srarchText,
+            queryType: "phone"
+          }
         },
         {
           title: `查找单位名称 "${this.srarchText}"`,
-          params: { queryText: this.srarchText, queryType: "company" }
+          params: {
+            queryText: this.srarchText,
+            queryType: "company"
+          }
         }
       ];
     }
   },
   methods: {
+    // service / api with Vuex
+    ...mapActions([
+      'setParams'
+    ]),
+    handleTabItemClick(item, index) {
+      this.filterName = item.name;
+      this.setParams({a:1,b:2})
+    },
     handleSorterItemClick(order) {
-      api.fetchList({ order, ...this.paramsObj }).then(res => {
-        this.list = res.data.list;
-        this.sorterSelectedIndex = order;
-        this.isSorterShow = false;
-      });
+      api
+        .fetchList({
+          order,
+          ...this.paramsObj
+        })
+        .then(res => {
+          this.list = res.data.list;
+          this.sorterSelectedIndex = order;
+          this.isSorterShow = false;
+        });
     },
     handleSearch(item) {
       const { params } = item;
@@ -211,7 +308,7 @@ export default {
 };
 </script>
 
-<style  lang="less" scoped>
+<style lang="less" scoped>
 .client-search-form {
   width: 100%;
   position: fixed;
@@ -232,7 +329,6 @@ export default {
     z-index: 1;
     width: 100%;
   }
-
   .filter {
     display: flex;
     background-color: #fff;
