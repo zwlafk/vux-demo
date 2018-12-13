@@ -11,9 +11,12 @@ dd,
 dt {
   margin: 0
 }
-html,body{
+
+html,
+body {
   height: 100%
 }
+
 // dd,dt {
 //   display: inline-block;
 // }
@@ -56,14 +59,68 @@ html,body{
   }
 }
 
-
-.tabbar-btn-group{
-    .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon, .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon > i, .weui-tabbar__item.weui-bar__item_on .weui-tabbar__label{
-      color: unset;
-    }
+.tabbar-btn-group {
+  .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon,
+  .weui-tabbar__item.weui-bar__item_on .weui-tabbar__icon>i,
+  .weui-tabbar__item.weui-bar__item_on .weui-tabbar__label {
+    color: unset;
+  }
 }
-
 
 .height-block {
   height: 50px;
+}
+
+a {
+  text-decoration: none;
+}
+
+// 什么都没有
+.no-data-tip {
+  display: block;
+  width: 190px;
+  height: 60px;
+  background: url(../../view/logins/img/notData.png) no-repeat;
+  padding-top: 185px;
+  color: #808080;
+  margin: 60px auto;
+  text-align: center;
+}
+
+// 无搜索结果
+.no-search-tip {
+  display: block;
+  width: 252px;
+  height: 60px;
+  background: url(../../view/logins/img/notSearch.png) no-repeat;
+  padding-top: 157px;
+  color: #808080;
+  margin: 60px auto;
+  text-align: center;
+}
+
+@font-face {
+  font-family: 'iconfont';
+  /* project id 949474 */
+  src: url('//at.alicdn.com/t/font_949474_0ordybmarf5m.eot');
+  src: url('//at.alicdn.com/t/font_949474_0ordybmarf5m.eot?#iefix') format('embedded-opentype'), url('//at.alicdn.com/t/font_949474_0ordybmarf5m.woff') format('woff'), url('//at.alicdn.com/t/font_949474_0ordybmarf5m.ttf') format('truetype'), url('//at.alicdn.com/t/font_949474_0ordybmarf5m.svg#iconfont') format('svg');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0 4px;
+}
+
+// cell右侧信息太多，导致换行  todo
+.sign-form {
+  .weui-cells {
+    .vux-label {
+      min-width: 90px;
+    }
+  }
 }

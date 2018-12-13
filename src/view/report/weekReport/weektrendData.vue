@@ -3,16 +3,16 @@
     <h2>销售签约数据趋势</h2>
     <div v-if="demo.length">
         <v-chart :data="demo">
+            <v-scale x :tick-count="3"  />
             <v-line series-field="type" />
         </v-chart>
     </div>
   <!-- {{trend.info.charList}} -->
-<!-- {{demo}} -->
   </div>
 </template>
 
 <script>
-import { VChart, VLine, VAxis, VTooltip } from 'vux'
+import { VChart, VLine, VAxis, VTooltip ,VScale} from 'vux'
 import { constants } from 'zlib';
 
 
@@ -26,7 +26,7 @@ export default {
         VChart,
         VLine,
         VAxis,
-        VTooltip
+        VTooltip,VScale
     },
     props:{
         trend:{

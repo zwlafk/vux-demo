@@ -65,4 +65,5 @@ export default {
   getFollowDetail(params) {
     return API.GET('/resource/mycust/linkRecordDetails', params)
   },
+
 }

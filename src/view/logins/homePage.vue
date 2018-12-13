@@ -13,18 +13,20 @@
           v-for="(item, index) in itemsList"
           :key="item.name"
           :data-index="index"
+          v-if="!item.isHide"
           >
-          <div class="homePage-content-bg" :class="item.class" @click="clickSkip(item.href)" >
-              <h4>{{item.name}}</h4>
-              <span>维护精准客户</span>
-          </div>
+            <div class="homePage-content-bg" :class="item.class" @click="clickSkip(item.href)" >
+                <h4>{{item.name}}</h4>
+                <span>{{item.describe}}</span>
+            </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-  import {
+import axios from 'axios'
+import {
         Group,
         Search,
         GridItem,
@@ -41,21 +43,15 @@
     data() {
       return {
         value: '',
-        items:[
-            {name:"我的客户",href:'ClientList',class:'myCust',key:'1'},
-            {name:"联系人",href:'contact',class:'contacts',key:'2'},
-            {name:"撞单查询",href:'clientCheck',class:'checks',key:'3'},
-            {name:"签到",href:'SignList',class:'signIn',key:'4'},
-            {name:"附近客户",href:'clientNearby',class:'nearbyCust',key:'5'},
-            {name:"消息中心",href:'messageCenter',class:'messageCenter',key:'6'},
-            {name:"经营报告",href:'reportview',class:'report',key:'7'},
-        ],
+        linkman:'',
+        busirep:'',
       };
     },
     methods:{
       clickSkip(va){
         this.$router.push({ name: va });
-      }
+      },
+     
     },
     computed: {
       itemsList: function () {
@@ -63,7 +59,39 @@
           return this.items.filter(function (item) {
           return item.name.toLowerCase().indexOf(vm.value.toLowerCase()) !== -1
         })
+      },
+      items(){
+        return [
+            {name:"我的客户",describe:'客户维护与查询',href:'ClientList',class:'myCust',key:'1'},
+            {name:"联系人",describe:'联系人维护与查询',href:'contact',class:'contacts',key:'2',isHide:!this.linkman},
+            {name:"撞单查询",describe:'避免客户撞单',href:'clientCheck',class:'checks',key:'3'},
+            {name:"签到",describe:'销售上门拜访',href:'SignList',class:'signIn',key:'4'},
+            {name:"附近客户",describe:'附近客户查询',href:'clientNearby',class:'nearbyCust',key:'5'},
+            {name:"消息中心",describe:'消息提醒、避免遗漏',href:'messageCenter',class:'messageCenter',key:'6'},
+            {name:"经营报告",describe:'汇总企业经营数据',href:'reportview',class:'report',key:'7',isHide:!this.busirep},
+        ]
       }
+    },
+    created() {
+      let _this = this;
+      axios.get("/wx/getIndexOnOff", {
+          // params: {
+          // page: 0
+          // }
+        })
+        .then(function(response) {
+          // let {data: { list }} = response;
+          if(response.data.status){
+            _this.linkman = response.data.linkman;
+            _this.busirep = response.data.busirep;
+          }else{
+            console.log('status为false')
+          }
+          
+        })
+        .catch(function(error) {
+          //console.log('error='+error);
+        });
     },
   };
 </script>

@@ -9,6 +9,12 @@ axios.interceptors.request.use(function (config) {
   Vue.$vux.loading.show({
     text: ""
   });
+  if (config.method === 'get') {
+    config.params = { 
+      _t: new Date().getTime(), 
+      ...config.params 
+    } 
+  }
   return config;
 
 }, function (error) {

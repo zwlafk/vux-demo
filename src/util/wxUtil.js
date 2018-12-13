@@ -23,10 +23,10 @@
 
 
 //Usage: wxChooseImage().then().catch()
-export const wxChooseImage = () => {
+export const wxChooseImage = (count) => {
   return new Promise((resolve, reject) => {
     wx.chooseImage({
-      count: 4, // 默认9
+      count: count?count:4, // 默认9
       sizeType: ["original", "compressed"], // 可以指定是原图还是压缩图，默认二者都有
       sourceType: ["album", "camera"], // 可以指定来源是相册还是相机，默认二者都有
       defaultCameraMode: "batch", //表示进入拍照界面的默认模式，目前有normal与batch两种选择，normal表示普通单拍模式，batch表示连拍模式，不传该参数则为normal模式。（注：用户进入拍照界面仍然可自由切换两种模式）

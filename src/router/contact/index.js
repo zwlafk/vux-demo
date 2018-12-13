@@ -8,10 +8,13 @@ export default [
   {
     path: '/contact/:rciId?', component: contactWrapper,
     children: [
-      { path: '', name: 'contact', component: contact },
+      { path: '', name: 'contact', component: contact , beforeEnter: (to, from, next) => {
+        document.title = "联系人"
+        next()
+      }},
       { path: 'edit/:tscidId?', name: 'contactEdit', component: contactForm },
       { path: 'detail/:tscidId', name: 'contactDetail', component: contactDetail },
-      { path: 'extraContact', name: 'contactExtra', component: contactExtra },
+      { path: 'contactExtra', name: 'contactExtra', component: contactExtra },
     ]
   },
 

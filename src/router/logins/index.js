@@ -8,8 +8,18 @@ export default [
     path: '/', component: loginsWrapper,
     children: [
       { path: '', name: 'login', component: login },
-      { path: 'homepage', name: 'homePage', component: homePage },
-      { path: 'messageCenter', name: 'messageCenter', component: messageCenter }
+      {
+        path: 'homePage', name: 'homePage', component: homePage, beforeEnter: (to, from, next) => {
+          document.title = "主页"
+          next()
+        }
+      },
+      {
+        path: 'messageCenter', name: 'messageCenter', component: messageCenter, beforeEnter: (to, from, next) => {
+          document.title = "消息中心"
+          next()
+        }
+      }
     ]
   },
 

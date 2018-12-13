@@ -2,21 +2,9 @@
 <template>
   <div class="">
         <Group>
-            <!-- <Cell title="姓名" :value="infoDetail.name" />
-            <Cell title="所在部门" :value="infoDetail.groupname" />
-            <Cell title="职务" :value="infoDetail.work" />
-            <Cell title="出生日期" :value="infoDetail.birthday" />
-            <Cell title="性别" :value="compSex" />
-            <Cell title="主要联系人" :value="isDefault" />
-            <Cell title="常用电话" :value="infoDetail.telphone" />
-            <Cell title="备用电话" :value="infoDetail.telphonebak" />
-            <Cell title="QQ" :value="infoDetail.qq" />
-            <Cell title="邮箱" :value="infoDetail.email" />
-            <Cell title="旺旺" :value="infoDetail.wangwang" />
-            <Cell title="微信联系人" :value="infoDetail.telphonebak" /> -->
             <Cell v-for="item in fields" :key="item.fieldId" v-if="item.enable == 1">
                 <span slot="title">{{item.fieldName}}</span>
-                <span>{{infoDetail[ item.fieldCode ]}}</span>
+                <span>{{currentField(item)}}</span>
             </Cell>
         </Group>
         <group>
@@ -35,6 +23,7 @@
     XButton,
   } from "vux";
   import api from '@/api/contact'
+  import moment from 'moment'
   import commonAPI from '@/api/common'
   import utils from '@/util/translateUtils'
 
@@ -56,6 +45,24 @@
     methods:{
       handleBtnClick(){
         this.$router.push({name:"contactEdit", params:this.$route.params})
+      },
+      currentField(it){
+        let code = it.fieldCode
+        let info = this.infoDetail[code]
+        if(it.dataType == 2){/*日期类型*/
+          return info ? moment(info).format("YYYY-MM-DD") : ""
+        }
+
+        if(it.optionList){
+          let resultArr = []
+            it.optionList.map(item=>{
+              if(info.indexOf(item.optionlistId) >= 0){
+                resultArr.push(item.optionName)
+              }
+            })
+          return resultArr.join(",")
+        }
+        return info
       }
     },
     computed:{
@@ -64,7 +71,7 @@
       },
       isDefault(){
         return utils.defaultDic(this.infoDetail.isDefault)
-      }
+      },
     },
     created() {
       let {params:{tscidId}} = this.$route

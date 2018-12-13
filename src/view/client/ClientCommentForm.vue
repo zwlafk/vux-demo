@@ -1,11 +1,17 @@
 <template>
   <div>
-    <group>
-      <x-input title="点评内容"
-               v-model="info"></x-input>
+    <group title="点评内容">
+      <x-textarea :max="150"
+                  required
+                  v-model="info"></x-textarea>
 
     </group>
-
+    <div>
+      <span style="margin-right: 1em">关联客户</span>
+      <span>
+        {{currentClientName}}
+      </span>
+    </div>
     <x-button class="btn"
               type="primary"
               @click.native="handleClick">保存</x-button>
@@ -26,7 +32,8 @@ import {
   XInput,
   Sticky,
   Tab,
-  TabItem
+  TabItem,
+  XTextarea
 } from "vux";
 export default {
   name: "ClientCommentForm",
@@ -42,11 +49,13 @@ export default {
     Sticky,
     XInput,
     Tab,
-    TabItem
+    TabItem,
+    XTextarea
   },
   data() {
     return {
       info: "",
+      currentClientName: this.$store.state.clientState.currentClient.cs_name,
       customerid: this.$route.params.custId
     };
   },
@@ -54,6 +63,13 @@ export default {
   methods: {
     handleClick() {
       console.log(this.$data);
+      if (!this.info) {
+        return this.$vux.toast.show({
+          text: "请输入点评内容",
+          position: "middle",
+          type: "text"
+        });
+      }
       api.saveComment({ ...this.$data }).then(res => {
         if (!res.status) return;
         this.$router.back();

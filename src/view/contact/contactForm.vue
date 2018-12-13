@@ -1,30 +1,21 @@
 <!--联系人-编辑-->
 <template>
   <div class="">
-        <group>
-             <!-- <x-input placeholder="所属客户"></x-input>
-             <x-input placeholder="请输入文本字段1"></x-input>
-             <x-input placeholder="请输入文本字段2"></x-input>
-             <x-input placeholder="常用电话" v-model="infoDetail.telphone"></x-input>
-             <x-input placeholder="备用电话" v-model="infoDetail.telphonebak"></x-input>
-             <selector :options="list" title="单选字段"></selector>
-             <selector :options="list" title="多选字段"></selector>
-             <datetime title="日期字段"></datetime> -->
-             <!-- <div v-for="item in fields" :key="item.fieldId" v-if="item.enable == 1"> -->
-                 <!-- <span slot="title">{{item.fieldName}}</span>
-                 <span>{{infoDetail[ item.fieldCode ]}}</span> -->
-
-                <!-- 传入props item title显示的label name读取键名 dataType 数据类型 v-on事件绑定 事件名为fieldsChange -->
-                 <!-- <custFieldsForm :item="item" :title="item.fieldName" :name="item.fieldCode" :dataType="item.dataType" v-model="infoDetail[ item.fieldCode ]" v-on:fieldsChange="fieldsChange"/> -->
-                 <!-- <x-input :title="item.fieldName" :placeholder="item.fieldName" v-if="item.dataType == 1" v-model="infoDetail[ item.fieldCode ]"></x-input>
-
-                 <datetime :title="item.fieldName" v-if="item.dataType == 2" v-model="infoDetail[ item.fieldCode ]"></datetime>
-
-                 <selector :options="list" :title="item.fieldName" v-if="item.dataType == 3" v-model="infoDetail[ item.fieldCode ]"></selector>
-
-                 <selector :options="list" :title="item.fieldName" v-if="item.dataType == 4 || item.dataType == 5" v-model="infoDetail[ item.fieldCode ]"></selector> -->
-
-             <!-- </div> -->
+        <group class="edit-box">
+             <PopupChecklist v-model="infoDetail.rciId"
+                              :isPopupShow="isCheckListShow"
+                             @on-change="handlePopupChecklistChange"
+                             @close-popup="isCheckListShow = false"
+                             :optionList="custList"
+                             isFromReport
+                             labelKey="custName"
+                             valueKey="custId">
+               <cell-box is-link
+                          slot="content"
+                          @click.native="isCheckListShow = true">
+                          {{ label? label:"请选择客户"}}
+               </cell-box>
+             </PopupChecklist>
              <template v-for="item in fields" v-if="item.enable == 1">
                <FormItem :key="item.fieldId"
                           v-if="item.dataType != 2"
@@ -40,7 +31,7 @@
                </group>
              </template>
         </group>
-        <group>
+        <group class="saveBtn">
               <x-button type="primary" @click.native="saveDetail">保存</x-button>
         </group>
   </div>
@@ -57,9 +48,10 @@
     Selector,
     Datetime
   } from "vux";
+  import PopupChecklist from "@/components/PopupChecklist";
   import api from "@/api/contact"
   import commonAPI from '@/api/common'
-  // import custFieldsForm from '@/components/custFields'
+  import custAPI from '@/api/client'
   import FormItem from "@/components/FormItem";
   export default {
     name: "contactsEdit",
@@ -72,16 +64,18 @@
       XInput,
       Selector,
       Datetime,
-      FormItem
+      FormItem,
+      PopupChecklist
     },
     data() {
       return {
-        list:[
-          { value: '选择1' },
-          { value: '选择2' }
-        ],
-        infoDetail:{},
-        fields:[]
+        custList:[],
+        infoDetail:{
+          rciId:""
+        },
+        fields:[],
+        isCheckListShow:false,
+        label:""
       };
     },
     methods:{
@@ -89,40 +83,61 @@
         api.saveItem(this.infoDetail).then(res =>{
           let {data:{resultCode,resultDesc}} = res
           if(resultCode == 1){
-            // this.$router.push({ name: 'contact'})
+            this.$vux.alert.show({
+              title: '新增结果',
+              content: "操作成功"
+            })
              this.$router.go(-1)
           }else{
-            console.log(resultDesc)
+            this.$vux.alert.show({
+              title: '新增结果',
+              content: resultDesc
+            })
           }
         }).catch(err=>{
           console.log(err)
         })
       },
-      fieldsChange(val){
-        this.infoDetail = Object.assign({},this.infoDetail,val)
+      handlePopupChecklistChange(val){
+        this.label = val.label.pop()
+        this.infoDetail.rciId = val.value.pop()
+        console.log(val)
       }
     },
-    created(){
+    mounted(){
       let {params:{tscidId}} = this.$route
       /*获取字段*/
       commonAPI.customFields().then( res =>{
-        console.log(res)
         let {data : {result:{concatFieldSets}}} = res
         this.fields = concatFieldSets
+      })
+      /*获取客户列表*/
+      custAPI.fetchList().then(res =>{
+        this.custList = res.data.list;
       })
       /*获取数据*/
       if(tscidId){
         api.fetchItem({detailId:tscidId}).then((res)=>{
-          console.log(res)
           let {data:{result}} = res
           this.infoDetail = result
         }).catch(err=>{
           console.log(err)
         })
-      }else{
-        this.infoDetail.rciId = this.$route.params.rciId
       }
-    }
-
+    },
   };
 </script>
+<style lang="less">
+.edit-box{
+    margin-bottom: 50px;
+
+    .weui-cells:before{
+      border-top: none;
+    }
+}
+.saveBtn{
+  width:100%;
+  position: fixed;
+  bottom: 0;
+}
+</style>

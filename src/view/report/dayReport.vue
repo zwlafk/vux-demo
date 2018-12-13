@@ -13,7 +13,7 @@
             <dayanalysis :analysic="list[1]"></dayanalysis>
         </div>
         <div>
-            <daywidth :wid="list[2]"></daywidth>
+            <daywidth :wid="list[2]" :contract="list[0]"></daywidth>
         </div>
     </div>
   </div>
@@ -94,7 +94,7 @@ export default {
       return axios.get("/report/business/yxCount",{params:{
         fromDateStr:moment().format("YYYY-MM-DD"),
         toDateStr:moment().format("YYYY-MM-DD"),
-        dateType:moment().format("YYYY-MM-DD"),
+        dateType:'now',
         groupIds:that.groupIds
       }});
     }

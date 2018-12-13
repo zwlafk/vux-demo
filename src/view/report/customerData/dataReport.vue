@@ -5,16 +5,25 @@
         <div>
             <dataGuestDepartment :analysic="gd"></dataGuestDepartment>
         </div>
-        <div v-if="ps.length">
-            <dataProductSalesD :analysic="ps"></dataProductSalesD>
+        <!-- z-index: 999999; -->
+        <div v-if="ps.length" style="position: relative;">
+            <dataProductSalesD :analysic="ps" :pszong="pszong"></dataProductSalesD>
         </div>
-        <div v-if="ct.length">
-            <dataCustomerType :analysic="ct"></dataCustomerType>
+        <div v-show="!ps.length"  style="background-color:#fff;margin-bottom:20px;padding-top:10px;">
+            <h2 style="margin-left:22px;">产品销售分布</h2>
+            <p class="no-data-tip" style="height:50px;margin-bottom:20px;height:123px;"></p>
         </div>
-         <div v-for="(item,index) in ADC" :key="index">
-            <dataCustomerAttribute v-if="item.fieldData.data.length" :analysic="item"></dataCustomerAttribute>
+        <div v-if="ct.length" style="position: relative;">
+            <dataCustomerType :analysic="ct" :ctzong="ctzong"></dataCustomerType>
         </div>
-    
+        <div v-show="!ct.length"  style="background-color:#fff;margin-bottom:20px;padding-top:10px;">
+            <h2 style="margin-left:22px;">客户类型分布</h2>
+            <p class="no-data-tip" style="height:50px;margin-bottom:20px;height:123px;"></p>
+        </div>
+         <div v-for="(item,index) in ADC" :key="index" style="position: relative;">
+            <h2 style="position:absolute;top:11px;left:22px;">客户属性分布-<span style="font-size:18px;">{{item.field.fieldName}}</span></h2>
+            <dataCustomerAttribute :analysic="item"></dataCustomerAttribute>
+        </div>
     </div>
   </div>
 </template>
@@ -43,7 +52,31 @@ export default {
      groupIds:{
       type:String,
       default:""
-    }
+    },
+    gdSum:{
+      type:Object,
+     default:function(){
+        return {}
+      }
+    },
+    psSum:{
+      type:Array,
+      default:function(){
+        return []
+      }
+    },
+    ctSum:{
+      type:Array,
+      default:function(){
+        return []
+      }
+    },
+    ADCSum:{
+      type:Array,
+      default:function(){
+        return []
+      }
+    },
   },
   data() {
     return {
@@ -51,10 +84,21 @@ export default {
       list: {
         
       },
-      gd:{},
+      gd:{
+        result:{
+          allNum:0,
+          resNum:0,
+          custNum:0,
+          signNum:0,
+          silentNum:0,
+          losingNum:0,
+          }
+      },
       ps:[],
       ct:[],
       ADC:[],
+      pszong:{},
+      ctzong:{},
       
     };
   },
@@ -95,60 +139,29 @@ export default {
       .then(axios.spread(function(guestD,customerA,productS,customerT,custADc) {
           that.gd=guestD.data
           that.ps=productS.data.result.list
+          that.pszong = productS.data.result
+          that.ctzong = customerT.data.result
+          console.log(that.pszong,"sb陈")
           that.ct=customerT.data.result.list
           that.ADC=custADc.data.result.list
-
-          console.log(guestD)
-          console.log(customerA)
-          console.log(111)
-          console.log( 'that.gd',that.gd)
-          console.log(222)
-          console.log( 'that.ps',that.ps)
-          console.log(333)
-          console.log( 'that.ct',that.ct)
-          console.log(444)
-          // console.log( 'that.ca',that.ca)
-          console.log(555)
-         
-
-          console.log( 'that.ADC',that.ADC)
-          // console.log(productS)
-          // console.log(customerT)
-          // console.log(customerAt)
         })
       );
   },
-  // watch:{
-  //   ADC:function(val){
-  //     let that = this
-  //     let arr =[]
-  //     val.map((item,index)=>{
-  //       axios.get('/layout/user/customcolumnChart', {
-  //         params: {
-  //           customColumn:item.fieldCode
-  //         }
-  //       })
-  //       .then(function (response) {
-  //         console.log(response,"zhaohohoh");
-  //         // console.log(that,"dasdasdasdasd")
-  //         that.ca=response.data.result.data
-
-  //         console.log(that.ca,"张飞")
-  //         // arr.push(that.ca)
-  //         // console.log(arr,"ssssssssssssssssssssss")
-  //       })
-  //       .catch(function (error) {
-  //         console.log(error);
-  //       });
-  //     })
-  //   },
-  //   ca:function(newval,oldval){
-  //     this.ABC.push(newval)
-  //       console.log(this.ABC.push(oldval),"xinzhi")
-  //       console.log(oldval,"旧制")
-  //       console.log(this.ca,"咯")
-  //   }
-  // }
+  watch:{
+    gdSum:function(val){
+      this.gd=val
+      console.log("客户分布到底更美观",this.gd)
+    },
+    psSum:function(val){
+      this.ps=val
+    },
+    ctSum:function(val){
+      this.ct=val
+    },
+    ADCSum:function(val){
+      this.ADC=val
+    },
+  }
 };
 </script>
 

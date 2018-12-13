@@ -3,7 +3,7 @@
     <div class="content" style="height:200px;position: relative;">
       <h2 style="text-align: left;">年度销售目标</h2>
       <div style='width:60px;height:60px;margin:25px 0 0 50px;'>
-        <x-circle
+        <x-circle v-if="target.info.factMoney"
           :percent="demo"
           :stroke-width="6"
           :trail-width="6"
@@ -54,8 +54,8 @@ export default {
     },
     computed:{
       demo:function(){
-        let percent = this.target.info.planRatio
-        return Number(percent)
+        let percent = parseFloat(this.target.info.planRatio)
+        return Number(percent)>=100?100:Number(percent)
       }
     }
 }

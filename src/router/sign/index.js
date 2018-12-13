@@ -8,9 +8,19 @@ export default [
   {
     path: '/sign', component: SignWrapper,
     children: [
-      { path: '', name: 'SignList', component: SignList },
-      { path: 'detail/:targetid', name: 'SignDetail', component: SignDetail },
-      { path: 'reply/:targetid', name: 'SignReplyForm', component: SignReplyForm },
+      {
+        path: '', name: 'SignList', component: SignList, beforeEnter: (to, from, next) => {
+          document.title = "签到"
+          next()
+        }
+      },
+      { path: 'detail/:wsiId', name: 'SignDetail', component: SignDetail },
+      {
+        path: 'reply/:targetid', name: 'SignReplyForm', component: SignReplyForm, beforeEnter: (to, from, next) => {
+          document.title = "回复"
+          next()
+        }
+      },
       { path: 'signform', name: 'SignForm', component: SignForm }
     ]
   },

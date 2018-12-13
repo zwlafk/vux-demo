@@ -28,7 +28,7 @@
                           optionListChildName="children"
                           >
             <button slot="content" class="btn-a" @click='isCheckListShow=true'>
-              {{checkedLabels?checkedLabels:`请选择`}}
+              {{checkedLabels?checkedLabels:`全公司`}}
             </button>
             <!-- <cell-box is-link
 
@@ -45,16 +45,16 @@
       <dayReport v-if="type =='day'" :listsum="listsum" :groupIds="groupIds"></dayReport>
     </div>
     <div>
-      <weekReport v-if="type =='week'" :listsum="listsum" :groupIds="groupIds"></weekReport>
+      <weekReport v-if="type =='week'" :listsum="listsum" :groupIds="groupIds" :form_to_time="form_to_time"></weekReport>
     </div>
     <div>
-      <monthReport v-if="type =='month'" :listsum="listsum" :groupIds="groupIds"></monthReport>
+      <monthReport v-if="type =='month'" :listsum="listsum" :groupIds="groupIds" :form_to_time="form_to_time"></monthReport>
     </div>
     <div>
-      <quarterReport v-if="type =='quarter'" :listsum="listsum" :groupIds="groupIds"></quarterReport>
+      <quarterReport v-if="type =='quarter'" :listsum="listsum" :groupIds="groupIds" :form_to_time="form_to_time"></quarterReport>
     </div>
     <div>
-      <dataReport v-if="type =='datareport'" :groupIds="groupIds"></dataReport>
+      <dataReport v-if="type =='datareport'" :groupIds="groupIds" :gdSum="gdSum" :psSum="psSum" :ctSum="ctSum" :ADCSum="ADCSum"></dataReport>
     </div>
 
 
@@ -124,7 +124,11 @@ export default {
       isnew:true,
       title1:'日报',
       list1:[["日报","周报","月报","季度报","客户数据",]],
-      
+      form_to_time:[],
+      gdSum:{},
+      psSum:[],
+      ctSum:[],
+      ADCSum:[]
       // listSelect:""
     };
   },
@@ -137,6 +141,8 @@ export default {
     changeType: function(s) {
       console.log("改变了",s)
       if (s == "日报") {
+        this.day=0
+        this.form_to_time=[]
         this.$refs.time.innerHTML = moment().format("YYYY-MM-DD")+"~"+moment().format("YYYY-MM-DD");
         this.$refs.old.disabled = false;
         this.$refs.next.disabled = true;
@@ -145,7 +151,11 @@ export default {
         this.$refs.next.innerHTML = "下一日";
         this.type='day'
         this.title1='日报'
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(0,10))
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(11,21))
       } else if (s== "月报") {
+        this.month=0
+        this.form_to_time=[]
         this.$refs.time.innerHTML = moment().month(moment().month() - 0).startOf("month").format("YYYY-MM-DD")+"~"+moment().format("YYYY-MM-DD");
         this.$refs.old.disabled = false;
         this.$refs.next.disabled = true;
@@ -154,8 +164,11 @@ export default {
         this.$refs.next.innerHTML = "下一月";
         this.type='month'
         this.title1='月报'
-
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(0,10))
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(11,21))
       } else if (s == "周报") {
+        this.week=0
+        this.form_to_time=[]
         this.$refs.time.innerHTML = moment().week(moment().week() - 0).startOf("week").format("YYYY-MM-DD")+"~"+moment().format("YYYY-MM-DD");
         this.$refs.old.disabled = false;
         this.$refs.next.disabled = true;
@@ -164,7 +177,11 @@ export default {
         this.$refs.next.innerHTML = "下周";
         this.type='week'
         this.title1='周报'
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(0,10))
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(11,21))
       } else if (s == "季度报") {
+        this.quarter=0
+        this.form_to_time=[]
         this.$refs.time.innerHTML = moment().quarter(moment().quarter() - 0).startOf("quarter").format("YYYY-MM-DD")+"~"+moment().format("YYYY-MM-DD");
         this.$refs.old.disabled = false;
         this.$refs.next.disabled = true;
@@ -173,6 +190,8 @@ export default {
         this.$refs.next.innerHTML = "下季度";
         this.type='quarter'
         this.title1='季度报'
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(0,10))
+        this.form_to_time.push(this.$refs.time.innerHTML.substring(11,21))
       } else {
         this.$refs.time.innerHTML = "";
         this.$refs.old.disabled = true;
@@ -180,6 +199,8 @@ export default {
         this.btn = false;
         this.type='datareport'
         this.title1='客户数据'
+        this.$refs.old.innerHTML=""
+        this.$refs.next.innerHTML=""
       }
     },
     oldtime: function(s) {
@@ -886,11 +907,69 @@ export default {
             })
           );
       }
-    }
+      if(!this.btn){
+        console.log(0,"if 判断")
+        
+
+
+        let that = this;
+        function guestDepartment() {
+          return axios.get("/layout/user/custStateChart",{params:{
+            type:"1",
+            groupIds:that.groupIds,
+          }});
+        }
+        function customerArea() {
+          return axios.get("/layout/user/provinceChart");
+        }
+        function productSales() {
+          return axios.get("/layout/user/productChart",{params:{
+            type:"1",
+            groupIds:that.groupIds,
+          }});
+        }
+        function customerType() {
+          return axios.get("/layout/user/custTypeChart",{params:{
+            type:"1",
+            groupIds:that.groupIds,
+          }});
+        }
+        function customerADC() {
+          return axios.get("/layout/user/allCustomcolumnChart",{params:{
+            groupIds:that.groupIds,
+          }});
+        }
+
+        axios.all([guestDepartment(),customerArea(),productSales(),customerType(),customerADC()])
+
+          .then(axios.spread(function(guestD,customerA,productS,customerT,custADc) {
+              that.gdSum=guestD.data
+              that.psSum=productS.data.result.list
+              that.ctSum=customerT.data.result.list
+              that.ADCSum=custADc.data.result.list
+              console.log(that.gdSum,"1")
+              console.log(that.psSum,"2")
+              console.log(that.ctSum,"3")
+              console.log(that.ADCSum,"4")
+            })
+          );
+
+
+
+
+
+
+
+
+
+
+      }
+    },
+    
   },
   mounted() {
     axios
-      .get("/orgGroup/get_group_json")
+      .get("/orgGroup/get_all_group_json")
       .then(response => {
         console.log(response);
         this.childrenList = response.data;

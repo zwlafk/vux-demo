@@ -18,7 +18,7 @@
         </div>
         <div>
             <!-- <leaderboard></leaderboard> -->
-              <quarterwidth :wid="list[2]"></quarterwidth>
+              <quarterwidth :wid="list[2]" :contract="list[0]"></quarterwidth>
         </div>
     </div>
     
@@ -88,6 +88,12 @@ export default {
      groupIds:{
       type:String,
       default:""
+    },
+    form_to_time:{
+      type:Array,
+      default:function(){
+        return []
+      }
     }
 
   },
@@ -104,24 +110,24 @@ export default {
     let that = this;
     function getrank() {
       return axios.get("/report/business/rankCount",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'quarter',
         groupIds:that.groupIds,
       }});
     }
     function getyx() {
       return axios.get("/report/business/yxCount",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'quarter',
         groupIds:that.groupIds,
       }});
     }
     function getinfo() {
       return axios.get("/report/business/count",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'quarter',
         groupIds:that.groupIds,
       }});

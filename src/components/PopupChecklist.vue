@@ -6,6 +6,10 @@
              position="bottom"
              height="100%"
              should-scroll-top-on-show>
+        <div style="text-align:right">
+          <i @click="$emit('close-popup')"
+             style="font-size:1.5em"
+             class="iconfont">&#xe601;</i></div>
         <group>
           <checklist :title="title"
                      v-model="tempVal"
@@ -50,6 +54,7 @@ export default {
     optionList: {},
     title: {},
     multiple: Boolean,
+    isChildrenOnly: Boolean,
     isPopupShow: {},
     optionListChildName: {
       type: String,
@@ -72,9 +77,10 @@ export default {
     },
     tempVal(val) {},
     options(val) {
-      if (val.length && this.tempVal.length) {
+      if (val.length && this.tempVal && this.tempVal.length) {
         let labelKey = [];
-        if (this.multiple) this.tempVal = this.tempVal[0].split(this.splitSymbol);
+        if (this.multiple)
+          this.tempVal = this.tempVal[0].split(this.splitSymbol);
         for (let index = 0; index < this.tempVal.length; index++) {
           let target = val.find(e => e.key == this.tempVal[index]);
           if (target && target.value) labelKey.push(target.value);
@@ -92,15 +98,23 @@ export default {
   computed: {
     tempVal: {
       get() {
-        return this.isFromReport ? this.value.split(this.splitSymbol) : this.value;
+        return this.isFromReport
+          ? this.value.split(this.splitSymbol)
+          : this.value;
       },
       set() {
-        return this.isFromReport ? this.value.split(this.splitSymbol) : this.value;
+        return this.isFromReport
+          ? this.value.split(this.splitSymbol)
+          : this.value;
       }
     },
     options() {
       if (!this.optionList || !this.optionList.length) return [];
-      let arr = deepFlattenTree(this.optionList, this.optionListChildName);
+      let arr = deepFlattenTree(
+        this.optionList,
+        this.optionListChildName,
+        this.isChildrenOnly
+      );
       const { labelKey, valueKey } = this;
       // key:真实值，value：展示值
       return arr.map(e => ({ key: e[valueKey], value: e[labelKey] }));

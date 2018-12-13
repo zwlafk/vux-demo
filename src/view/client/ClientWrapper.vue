@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="wrapper">
 
     <router-view />
   </div>
@@ -33,3 +33,8 @@ export default {
   mounted() {}
 };
 </script>
+<style lang="less" scoped>
+.wrapper{
+  height: 100%;
+}
+</style>

@@ -6,9 +6,11 @@
         <cell-box class="followlist-item"
                   :link="{name:'ClientFollowDetail',params:{followId:item.id}}"
                   :key="index">
-          <div class="followlist-item-title">{{item.nickname}} 2018-01-01</div>
+          <div class="followlist-item-title">{{item.nickname}} {{item.time|dateFormat}}</div>
           <div class="followlist-item-content">{{item.info}}</div>
-          <!-- <span class="view-pic">查看图片</span> -->
+          <span v-if="item.feedbackImg"
+                class="view-pic"
+                @click.stop="previewPic(item.feedbackImg)">查看图片</span>
         </cell-box>
       </template>
 
@@ -57,6 +59,14 @@ export default {
     };
   },
   methods: {
+    previewPic(imgStr) {
+      console.log("previewPic", imgStr);
+      let imgArr = imgStr.split(",");
+      wx.previewImage({
+        current: imgArr[0], // 当前显示图片的http链接
+        urls: imgArr // 需要预览的图片http链接列表
+      });
+    },
     handleAddFollowRecord() {
       this.$router.push({ name: "ClientFollowForm" });
     }

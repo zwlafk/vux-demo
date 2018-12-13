@@ -3,12 +3,19 @@
     <group :title="fieldName">
       <x-input v-if="dataType==1"
                v-model="tempVal"
+               :required="required"
                @on-change="handleInputChange"
-               :placeholder="'请输入'+fieldName"></x-input>
+               :placeholder="placeholder||'请输入'+fieldName"></x-input>
 
-      <DateRangePicker v-model="date"
-                       v-if="dataType==2"></DateRangePicker>
-
+      <!-- <DateRangePicker v-model="date"
+                       v-if="dataType==2"></DateRangePicker> -->
+      <datetime v-model="tempVal"
+                v-if="dataType==2"
+                year-row="{value}年"
+                month-row="{value}月"
+                day-row="{value}日"
+                :title="fieldName"
+                format="YYYY-MM-DD" />
       <PopupChecklist v-if="dataType==3"
                       :isPopupShow="isCheckListShow"
                       @on-change="handlePopupChecklistChange"
@@ -77,7 +84,7 @@
 </template>
 
 <script>
-import { CellBox, Group, XInput } from "vux";
+import { CellBox, Group, XInput, Datetime } from "vux";
 import DateRangePicker from "@/components/DateRangePicker";
 import PopupChecklist from "@/components/PopupChecklist";
 export default {
@@ -87,15 +94,18 @@ export default {
     PopupChecklist,
     CellBox,
     Group,
+    Datetime,
     XInput
   },
   props: {
+    placeholder: {},
     value: {},
     dataType: {},
     enable: {},
     fieldLength: {},
     fieldName: {},
     isRequired: {},
+    required: Boolean,
     optionList: {}
   },
   filters: {},

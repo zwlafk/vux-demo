@@ -11,6 +11,8 @@
     </div>
     
     <!-- {{analysic.yxlist}} -->
+    <p v-show="!demo.length" class="no-data-tip" style="height:50px;margin-top:40px;"></p>
+
   </div>
 </template>
 

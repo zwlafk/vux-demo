@@ -12,28 +12,32 @@
         </cell>
       </group>
       <!-- 联系人 -->
-      <group class="group-cell-without-border">
+      <group v-if="isCompanyUser"
+             class="group-cell-without-border">
         <cell class="cell-btntitle">
           <!-- title -->
           <div slot="title">
             <span>联系人</span>
             <span class="cell-titlebtn-pullright"
-                  @click="handleAddContact">+</span>
+                  @click="handleAddContact"><i class="iconfont">&#xe61a;</i></span>
           </div>
           <!-- content -->
           <div slot="inline-desc"
                v-if="data.toucher_size">
-            <!--  -->
             <div v-for="item in data.list_toucher"
                  :key="item.id">
               <p>{{`${item.nickname} ${item.position}`}}</p>
-              <template v-for="(telItem,index) in item.tel.split('#')">
-                <div class="contact-list-item"
-                     :key="index">
-                  <span class="contact-list-item-tel">{{telItem}}</span>
-                  <span><a :href="`tel:${telItem}`">电话图标</a></span>
-                </div>
-              </template>
+              <div v-if="item.telphone"
+                   class="contact-list-item">
+                <span class="contact-list-item-tel">常用电话 {{item.telphone}}</span>
+                <span><a :href="`tel:${item.telphone}`"><i class="iconfont">&#xe605;</i></a></span>
+              </div>
+              <div v-if="item.telphonebak"
+                   class="contact-list-item">
+                <span class="contact-list-item-tel">备用电话 {{item.telphonebak}}</span>
+                <span><a :href="`tel:${item.telphonebak}`"><i class="iconfont">&#xe605;</i></a></span>
+              </div>
+
             </div>
 
             <!-- <template v-for="item in data.list_toucher">
@@ -58,7 +62,7 @@
           <div slot="title">
             <span>跟进记录</span>
             <span class="cell-titlebtn-pullright"
-                  @click="handleAddFollow">+</span>
+                  @click="handleAddFollow"><i class="iconfont">&#xe61a;</i></span>
           </div>
           <!-- content -->
 
@@ -68,7 +72,7 @@
             <p>水分很大空间发挥空间的撒谎方可加萨</p> -->
             <div v-for="item in data.obj_gjjl"
                  :key="item.id">
-              <p>{{item.nickname}} {{item.time|dateFormat}}</p>
+              <p style="font-size:14px">{{item.nickname}} | {{item.time|dateFormat}}</p>
               <p>{{item.info}}</p>
 
             </div>
@@ -94,7 +98,7 @@
                v-if="data.fwhf_size">
             <div v-for="item in data.obj_fwhf"
                  :key="item.id">
-              <p>{{item.nickname}}</p>
+              <p>{{item.nickname}} {{item.time|dateFormat}}</p>
               <p>{{item.info}}</p>
 
             </div>
@@ -115,7 +119,7 @@
           <div slot="title">
             <span>点评记录</span>
             <span class="cell-titlebtn-pullright"
-                  @click="handleAddComment">+</span>
+                  @click="handleAddComment"><i class="iconfont">&#xe61a;</i></span>
           </div>
           <!-- content -->
           <div slot="inline-desc"
@@ -146,10 +150,16 @@
           <!-- content -->
           <div slot="inline-desc"
                v-if="data.calllg_size">
-            <div v-for="item in data.list_calllg"
+            <div class="soundlist-item"
+                 v-for="item in data.list_calllg"
                  :key="item.id">
-              <p>{{item.toucher_name}} {{item.time|dateFormat}}</p>
-              <p>{{item.call_num}}{{item.type|transCallType}}</p>
+              <div>
+                <p>{{item.toucher_name}} {{item.time|dateFormat}} {{item.time_len|formatSeconds}}</p>
+                <p>{{item.call_num}}{{item.type|transCallType}}</p>
+              </div>
+              <div v-if="item.record_path"
+                   class="playaudio"
+                   @click="playAudio(item.record_path)"><i class="iconfont">&#xe610;</i></div>
 
             </div>
           </div>
@@ -163,22 +173,26 @@
       </group>
     </template>
     <div class="height-block"></div>
-    <tabbar v-if="sale_status!==''" class="tabbar-btn-group">
+    <tabbar v-if="sale_status!==''"
+            class="tabbar-btn-group">
       <!--  资源：跟进、签到、放弃客户、签约
             意向：跟进、签到、放弃客户、签约
             签约：跟进、签到 -->
-      <!-- sale_status		(销售状态)0.1.意向客户、2.签约客户 -->
-      <tabbar-item @on-item-click="handleTabbarItemClick('follow')">
+      <!-- sale_status  1-待分配，2-资源，3-意向客户，4-公海客户，5-资源回收站，6-签约客户，7-沉默客户，8-流失客户'
+ -->
+      <tabbar-item v-if="sale_status==3||sale_status==2||sale_status==6"
+                   @on-item-click="handleTabbarItemClick('follow')">
         <span slot="label">跟进</span>
       </tabbar-item>
-      <tabbar-item @on-item-click="handleTabbarItemClick('sign')">
+      <tabbar-item v-if="sale_status==3||sale_status==2||sale_status==6"
+                   @on-item-click="handleTabbarItemClick('sign')">
         <span slot="label">签到</span>
       </tabbar-item>
-      <tabbar-item v-if="sale_status!=2"
+      <tabbar-item v-if="sale_status!=6"
                    @on-item-click="handleTabbarItemClick('abandon')">
         <span slot="label">放弃客户</span>
       </tabbar-item>
-      <tabbar-item v-if="sale_status!=2"
+      <tabbar-item v-if="sale_status!=6"
                    @on-item-click="handleTabbarItemClick('signed')">
         <span slot="label">签约</span>
       </tabbar-item>
@@ -227,20 +241,21 @@ export default {
     }
   },
   computed: {
-    contactNumList() {
-      if (!this.hasData) return [];
-      if (data.toucher_size) return list_toucher.split();
-    }
+    // contactNumList() {
+    //   if (!this.hasData) return [];
+    //   if (this.data.toucher_size) return this.list_toucher.split();
+    // }
   },
   data() {
     return {
+      isCompanyUser: this.$store.state.userInfoState.userInfo.isCompanyUser,
       data: {},
       hasData: false,
       type: 0,
       custId: this.$route.params.custId,
       sale_status: "",
       dataMapper: {
-        type: "客户类型",
+        custTypeName: "客户类型",
         time_near: "最近跟进时间",
         sale_status: "客户状态",
         sale_jc: "销售进程",
@@ -251,6 +266,10 @@ export default {
     };
   },
   methods: {
+    playAudio(src) {
+      this.audio = new Audio(src);
+      this.audio.play();
+    },
     genMoment(time) {
       return moment(time);
     },
@@ -273,14 +292,20 @@ export default {
           this.handleAddFollow();
         },
         sign() {
-          this.$router.push({ path: "/sign" });
+          this.$router.push({ path: "/sign/signform" });
         },
         abandon() {
           this.$vux.confirm.show({
             // title: "Title",
             content: "是否确认放弃该客户？",
             onConfirm: () => {
-              api.giveUpCust({ custId: this.custId });
+              api.giveUpCust({ custId: this.custId }).then(res => {
+                this.$vux.toast.show({
+                  text: "",
+                  position: "middle",
+                  type: "success"
+                });
+              });
             }
           });
         },
@@ -289,7 +314,27 @@ export default {
             // title: "Title",
             content: "是否确认签约该客户？",
             onConfirm: () => {
-              api.signedCust({ custId: this.custId });
+              api
+                .signedCust({ custId: this.custId })
+                .then(res => {
+                  this.$vux.toast.show({
+                    text: "",
+                    position: "middle",
+                    type: "success"
+                  });
+                  return api.getCust({ custId: this.custId });
+                })
+                .then(res => {
+                  this.data = res.data.data;
+                  this.$store.commit(
+                    "clientState/setCurrentClient",
+                    res.data.data
+                  );
+                  this.type = res.data.data.type;
+                  this.sale_status = res.data.data.sale_status;
+                  this.hasData = true;
+                })
+                .catch(() => {});
             }
           });
         }
@@ -302,6 +347,7 @@ export default {
       .getCust({ custId: this.custId })
       .then(res => {
         this.data = res.data.data;
+        this.$store.commit("clientState/setCurrentClient", res.data.data);
         this.type = res.data.data.type;
         this.sale_status = res.data.data.sale_status;
         this.hasData = true;
@@ -328,5 +374,10 @@ i {
 }
 .height-block {
   height: 50px;
+}
+.soundlist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

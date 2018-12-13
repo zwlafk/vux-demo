@@ -3,28 +3,29 @@
   <div class="clientCheck">
       <search
           @on-change="getResult"
-          :results="results"
           v-model="value"
           @on-submit="onSubmit"
+          @on-cancel="cancel"
           ref="search">
       </search>
       <div class="clientCheck-main">
-        <div class="clientCheck-content" v-for="item in items" @click="homePage(item.customerid)" :key="item">
+        <div v-if="data" class="clientCheck-content" v-for="item in items" @click="homePage(item.customerid)" :key="item.customerid">
             <p class="clientCheck-content_cs_name">
               <span>{{item.cs_name}} </span>
-              <span class="clientCheck-content_status" v-if="item.status == 1">资源</span>
-              <span class="clientCheck-content_status" v-if="item.status == 2">意向</span>
-              <span class="clientCheck-content_status" v-if="item.status == 3">签约</span>
-              <span class="clientCheck-content_status" v-if="item.status == 4">沉默客户</span>
-              <span class="clientCheck-content_status" v-if="item.status == 5">流失</span>
-              <span class="clientCheck-content_status" v-if="item.status == 6">公海</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #fb8734;color: #fb8734;" v-if="item.status == 0">待分配资源</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #65b5fe;color: #65b5fe;" v-if="item.status == 1">资源</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #f8ae23;color: #f8ae23;" v-if="item.status == 2">意向</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #50c8c2;color: #50c8c2;" v-if="item.status == 3">签约</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #3281fd;color: #3281fd;" v-if="item.status == 4">沉默客户</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #74a1ef;color: #74a1ef;" v-if="item.status == 5">流失</span>
+              <span class="clientCheck-content_status" style="border: 1px solid #6c74d9;color: #6c74d9;" v-if="item.status == 6">公海</span>
             </p> 
             <p>所有者 : {{item.ownername}}</p>
-            <p>创建时间 :{{item.creattime}}</p>
+            <p>创建时间 :{{item.creattime | dateFormat}}</p>
             <p>销售进程 :{{item.level_sale}}</p>
         </div>
+        <div class="no-search-tip" v-if="!data">输入查询值查询客户是否已存在</div>
       </div>
-      
   </div>
 </template>
 <script>
@@ -45,37 +46,51 @@
     },
 data() {
     return {
-      results: [],
       value: '',
-      items:[]
+      items:[],
+      data:false,
     }
   },
   methods: {
     getResult (val) {},
+    cancel(){
+      console.log('cancel')
+    },
     onSubmit () {
+        this.$refs.search.setBlur()
         let that = this
-        // console.log(that)
-        // console.log("this.value",this.value)
-        axios.get('/resource/mycust/custCheck',{
-        params:{
-          keyword:this.value
-          }
-        })
-        .then(function(response){
-          let{data:{list}} = response
-          // console.log('response='+response)
-          // console.log('list='+list)
-          that.items = list
-        })
-        .catch(function(error){
-          //console.log('error='+error); 
-        })
+        if(this.value){
+            axios.get('/resource/mycust/custCheck',{
+              params:{
+                  keyword:this.value
+                }
+              })
+              .then(function(response){
+                let{data:{list}} = response
+                console.log('list=',list)
+                if(list){
+                  that.data = true
+                  console.log('data=true')
+                  that.items = list
+                }else{
+                  that.data = false
+                  console.log('data=false')
+                }
+              })
+              .catch(function(error){
+                //console.log('error='+error); 
+              })
+        }else{
+          this.data = false
+        }
     },
     homePage(custId){
       this.$router.push({ name: "ClientPreview",params:{custId:custId} });
     }
   },
-  mounted(){}
+  mounted(){
+   
+  }
 }
 </script>
 <style>
@@ -103,12 +118,8 @@ data() {
 .clientCheck-content_status{
     position: absolute;
     right: 0;
-    border: 1px solid #54c4c6;
     padding: 1px 4px;
-    color: #54c4c6;
     border-radius: 5px;
     font-size: 14px;
 }
-
-
 </style>

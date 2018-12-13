@@ -1,9 +1,10 @@
 <template>
   <div class="">
-    <p v-if="isNoData">无数据</p>
+    <!-- <p v-if="isNoData">无数据</p> -->
     <group>
       <template v-for="(value, key) in data">
-        <cell :key="key"
+        <cell class="cell-leftfixed"
+              :key="key"
               :title="dataMapper[key]"
               :value="value|transValue(key)"></cell>
       </template>
@@ -42,7 +43,6 @@ export default {
   },
   filters: {
     transValue(value, key) {
-      console.log(arguments, "ss");
       let todoKeyMapper = {
         status(val) {
           // 客户状态：1、2-资源，3-意向客户，4-公海客户，5--，6-签约客户，7-沉默客户，8-流失客户
@@ -135,5 +135,17 @@ export default {
 .bottom-btn {
   position: fixed;
   bottom: 0;
+}
+</style>
+<style lang="less" >
+.cell-leftfixed {
+  .vux-cell-primary {
+    -webkit-box-flex: unset;
+    -ms-flex: unset;
+    flex: unset;
+  }
+  .weui-cell__ft {
+    flex: 1;
+  }
 }
 </style>

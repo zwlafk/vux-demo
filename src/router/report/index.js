@@ -16,7 +16,11 @@ export default [
   {
     path: '/report', component: day,
     children: [
-      { path: '', name: 'reportview', component: reportview },
+      { path: '', name: 'reportview', component: reportview , beforeEnter: (to, from, next) => {
+        document.title = "经营报告"
+        next()
+      }
+    },
       { path: 'dayContractData', name: 'dayContractData', component: dayContractData },
       { path: 'dayExecution', name: 'dayExecution', component: dayExecution },
       { path: 'daycallData', name: 'daycallData', component: daycallData },

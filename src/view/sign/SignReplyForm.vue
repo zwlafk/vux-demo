@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <group>
-      <x-textarea :max="20" placeholder="test" v-model="formData.msg"></x-textarea>
+      <x-textarea :max="200" placeholder="请输入回复" v-model="formData.msg"></x-textarea>
     </group>
     <div class="height-block"></div>
     <x-button class="bottom-btn"
@@ -39,16 +39,26 @@ export default {
   data() {
     return {
       formData: {
-        type: 1,
+        type: "1",
         targetid: "",
         page: "",
         comefrom: "",
         msg: "",
-        plid: "accac85b55b84049b1c6d2554533e788"
+        plid: ""
       }
     };
   },
   methods: {
+    getDevicesInfo(){
+      let ua = navigator.userAgent.toLowerCase()
+      if (ua.indexOf('andriod') > -1) {
+        this.formData.comefrom = 'andriod'
+      }else if(/iphone|ipad/i.test(ua)){
+        this.formData.comefrom = 'ios'
+      }else{
+        this.formData.comefrom = 'pc端'
+      }
+    },
     handleClick() {
       api.fetchAddReply(this.formData).then(()=>{
         // console.log(this)
@@ -62,6 +72,8 @@ export default {
   },
   mounted() {
     console.log(this.$route)
+    this.getDevicesInfo()
+    Object.assign(this.formData,this.$route.params)
   }
 };
 </script>

@@ -30,6 +30,7 @@
                       :optionList="pendingArr"
                       labelKey="text"
                       valueKey="id"
+                      :isChildrenOnly="searchName=='所有者'"
                       multiple
                       optionListChildName="children"
                       :fieldName="fieldName">

@@ -1,6 +1,6 @@
 <template>
   <div class="contact-list">
-    <group>
+    <group class="search-title">
       <search v-model="searchs"
               @on-change="changeSearch"
               @on-submit="submitSearch('name',searchs)"
@@ -13,17 +13,17 @@
       </search>
     </group>
 
-    <group>
+    <group class="itemBox">
       <cell v-for='item in dataList' @click.native="detailClick(item.tscidId)" :key="item.tscidId" value-align="left">
-        <p class="name">{{item.name}}</p>
-        <p>{{item.orgId}}</p>
+        <p class="name">{{item.name}} <span class="telphone">{{item.telphone||item.telphonebak}}</span></p>
+        <p>{{item.custName}}</p>
         <div class="icon-box">
-          <Icon v-if="item.wxUserId" type="info-circle" @click.native.stop="infoClick(item.wxUserId)"/>
-          <Icon v-if="item.telphone || item.telphonebak" type="success-circle" @click.native.stop="successClick(item.telphone,item.telphonebak)"/>
+          <i v-if="item.wxUserId" class="iconfont icon-dianhua" @click.native.stop="infoClick(item.wxUserId)"/>
+          <i v-if="item.telphone || item.telphonebak" class="iconfont icon-dianhua" @click.native.stop="successClick(item.telphone,item.telphonebak)"/>
         </div>
       </cell>
     </group>
-    <group>
+    <group class="add-contact">
       <x-button type="primary"
                 @click.native="handleBtnClick">新增联系人</x-button>
     </group>
@@ -114,6 +114,10 @@ export default {
     },
     cancelSearch(){
       this.searchBox = false
+      api.fetchList(this.$route.params).then(res => {
+        let {data:{result:{list}}} = res
+        this.dataList = list;
+      });
     },
   },
   mounted() {
@@ -127,8 +131,17 @@ export default {
 <style lang="less">
 
   .contact-list{
+
+    .search-title .vux-no-group-title{
+      margin-top:0;
+      height:44px;
+    }
     .weui-cells.vux-search_show .weui-cell:last-child{
       margin-bottom: 0;
+    }
+
+    .itemBox{
+      margin-bottom: 50px;
     }
 
     .weui-cell{
@@ -139,6 +152,12 @@ export default {
         &.name{
           font-size: 16px;
           color: #333;
+
+          .telphone{
+            color:#ccc;
+            font-size: 14px;
+            margin-left: 10px;
+          }
         }
       }
 
@@ -147,7 +166,18 @@ export default {
         right: 0;
         top: 10px;
         width: 100px;
+        i{
+          font-size: 22px;
+          color: #1aad19;
+          cursor: pointer;
+        }
       }
+    }
+
+    .add-contact{
+      position: fixed;
+      width: 100%;
+      bottom: 0;
     }
   }
 </style>

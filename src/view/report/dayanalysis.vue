@@ -11,6 +11,8 @@
     </div>
     <!-- {{demo}} -->
     <!-- v-if="JSON.stringify(demo)!=='{}'" -->
+    <p v-show="!demo.length" class="no-data-tip" style="height:50px;margin-top:40px;"></p>
+
   </div>
 </template>
 

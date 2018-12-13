@@ -4,6 +4,8 @@
     <template v-for="item in requiredFields">
       <FormItem :key="item.id"
                 v-bind="item"
+                placeholder="必填"
+                required
                 v-model="formData[item.fieldCode]">
       </FormItem>
     </template>
@@ -62,7 +64,8 @@ export default {
       restFields: [],
       groupList: [],
       groupOptionList: [],
-      dataSource: {}
+      dataSource: {},
+      requiredKeys: []
     };
   },
   watch: {
@@ -70,6 +73,7 @@ export default {
       if (!val.length) return;
       // 启用且必填字段
       this.requiredFields = val.filter(e => !!e.isRequired);
+      this.requiredKeys = this.requiredFields.map(e => e.fieldCode);
       // 切换显示/隐藏 字段 （启用非必填）
       this.restFields = val.filter(e => !e.isRequired);
     }
@@ -96,7 +100,24 @@ export default {
   },
   methods: {
     handleClick() {
-      // console.log(this.formData, "this.formData");
+      // this.requiredKeys
+      let isSubmitable = true;
+      for (let index = 0; index < this.requiredKeys.length; index++) {
+        let currentKey = this.requiredKeys[index];
+        if (!this.formData[currentKey]) {
+          isSubmitable = false;
+          break;
+        }
+      }
+      if (!isSubmitable) {
+        return this.$vux.toast.show({
+          text: "请检查必填项",
+          position: "middle",
+          type: "text"
+        });
+      }
+
+      console.log(this.formData, "this.formData");
       if (this.custId) {
         this.formData.resCustId = this.custId;
       }
@@ -111,7 +132,7 @@ export default {
   },
   mounted() {
     api
-      .getCustFormFieldList()
+      .getCustFormFieldList({id: this.custId})
       .then(res => {
         const { data } = res;
         this.groupList = data.data.groupList;

@@ -1,13 +1,14 @@
 <!--消息中心-->
 <template>
   <div class="messageCenter">
-      <div class="messageCenter-content" v-for="item in items" :key="item">
+      <div class="messageCenter-content" v-for="item in items" :key="item.title" v-if="data">
           <h4>{{ item.title }}</h4>
-          <p style="margin:10px 0;color:#999999;">{{ item.time_action }}</p>
-          <p>{{ item.info }}</p>
+          <p style="margin:10px 0;color:#999999;">{{ item.time_action | dateFormat}}</p>
+          <p v-html="item.info">{{item.info}}</p>
       </div>
-        <!-- <x-button type="primary"  @click.native="click">ss</x-button> -->
+      <div class="no-data-tip" v-if="!data">什么都没有！</div>
   </div>
+  
 </template>
 <script>
 import { Group, Search, GridItem, Grid,XButton  } from "vux";
@@ -19,12 +20,14 @@ export default {
     Search,
     GridItem,
     Grid,
-    XButton 
+    XButton
   },
   data() {
     return {
       infoMessageCenter: {},
-      items: []
+      items: '',
+      data:''
+      
     };
   },
   created() {
@@ -36,7 +39,16 @@ export default {
       })
       .then(function(response) {
         let {data: { list }} = response;
-        _this.items = list;
+        console.log('list',list)
+        if(list){
+           _this.data = true
+            console.log('data=true')
+            _this.items = list;
+        }else{
+         _this.data = false
+          console.log('data=false')
+        }
+        
       })
       .catch(function(error) {
         //console.log('error='+error);
@@ -51,8 +63,8 @@ export default {
 </script>
 
 <style>
-.messageCenter-content{
-  padding:20px;
-  border-bottom:1px solid #e6e6e6;
-}
+  .messageCenter-content{
+    padding:20px;
+    border-bottom:1px solid #e6e6e6;
+  }
 </style>

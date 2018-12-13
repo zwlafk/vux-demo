@@ -7,11 +7,12 @@
                   :key="index">
           <div class="followlist-item-info">
 
-            <div class="followlist-item-title">{{item.toucher_name}} {{item.time|dateFormat}}</div>
+            <div class="followlist-item-title">{{item.toucher_name}} {{item.time|dateFormat}} {{item.time_len|formatSeconds}}</div>
             <div class="followlist-item-content">{{item.call_num}}{{item.type|transCallType}}</div>
           </div>
           <div class="playaudio"
-               @click="playAudio(item.record_path)">播放</div>
+               v-if="item.record_path"
+               @click="playAudio(item.record_path)"><i class="iconfont">&#xe610;</i></div>
         </cell-box>
       </template>
 
@@ -83,26 +84,26 @@ export default {
       .getSoundList({ customerid: this.custId, page: 1 })
       .then(res => {
         this.dataList = res.data.list;
-        this.dataList = [
-          {
-            id: "31b318e2f35045d6a03626d3a59e42cd",
-            toucher_name: "531531531",
-            call_num: 13333333333,
-            type: 1
-          },
-          {
-            id: "31b328e2f35045d6a03626d3a59e42cd",
-            toucher_name: "531531531",
-            call_num: 13333333333,
-            type: 2
-          },
-          {
-            id: "31b318e2q35045d6a03626d3a59e42cd",
-            toucher_name: "531531531",
-            call_num: 13333333333,
-            type: 4
-          }
-        ];
+        // this.dataList = [
+        //   {
+        //     id: "31b318e2f35045d6a03626d3a59e42cd",
+        //     toucher_name: "531531531",
+        //     call_num: 13333333333,
+        //     type: 1
+        //   },
+        //   {
+        //     id: "31b328e2f35045d6a03626d3a59e42cd",
+        //     toucher_name: "531531531",
+        //     call_num: 13333333333,
+        //     type: 2
+        //   },
+        //   {
+        //     id: "31b318e2q35045d6a03626d3a59e42cd",
+        //     toucher_name: "531531531",
+        //     call_num: 13333333333,
+        //     type: 4
+        //   }
+        // ];
       })
       .catch(e => {});
   }

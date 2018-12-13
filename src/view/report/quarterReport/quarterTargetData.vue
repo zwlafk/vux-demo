@@ -3,7 +3,7 @@
     <div class="content" style="height:200px;position: relative;">
       <h2 style="text-align: left;">年度销售目标</h2>
       <div style='width:60px;height:60px;margin:25px 0 0 50px;'>
-        <x-circle
+        <x-circle v-if="target.info.planRatio"
           :percent="demo"
           :stroke-width="6"
           :trail-width="6"
@@ -12,8 +12,6 @@
           <span style="color:#36D1DC">{{ target.info.planRatio }}</span>
         </x-circle>
       </div>
-
-      
     <card style="position:absolute;top:60px;right:20px;">
       <div slot="content" class="card-padding">
         <p style="color:#999;font-size:12px;">年度目标</p>
@@ -54,8 +52,9 @@ export default {
     },
     computed:{
       demo:function(){
-        let percent = this.target.info.planRatio
-        return Number(percent)
+        // let percent = this.target.info.planRatio
+        let percent = parseFloat(this.target.info.planRatio)
+        return Number(percent)>=100?100:Number(percent)
       }
     }
 }

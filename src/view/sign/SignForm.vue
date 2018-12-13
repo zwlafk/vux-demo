@@ -1,33 +1,77 @@
 <template>
-  <div class="">
+  <div class="sign-form">
     <group>
-      <x-input  title="签到时间" 
-                v-model="formData.time"
-                readonly
-                text-align="right"></x-input>
-      <x-address  @on-hide="logHide" 
+      <cell  title="签到时间" :value="time"></cell>
+      <!-- <x-address  @on-hide="logHide" 
                   @on-show="logShow"
                   title=""
                   :list="addressData" 
                   @on-shadow-change="onShadowChange" 
                   placeholder="请选择地址" 
-                  inline-desc="可以设置placeholder" ></x-address>
-      <x-button @click.native="handleLocation">签到地图</x-button>
-      <img v-for="(item,index) in formData.images" :key="index" :src="item" style="width:40px;">
-      <x-button @click.native="handleUpload">上传图片</x-button>
-      <x-textarea :max="200" name="info" :placeholder="签到内容" v-model="formData.info"></x-textarea>
-      <x-button @touchstart.native="handleStartRecord" @touchend.native="handleStopRecord">按住录音</x-button>
-      <x-button @click.native="handlePlayVoice(formData.localId)">播放录音</x-button>
-      <x-button @click.native="handleSelectEnterpriseContact">选择联系人</x-button>
-      <x-button @click.native="handleSelectExternalContact">选择外部联系人</x-button>
+                  inline-desc="可以设置placeholder" ></x-address> -->
+      
+      <PopupCustlist class="checkBox"
+                      :optionList="radioCustList"
+                      :isPopupShow="isCustListShow"
+                      @on-change="handlePopupCustlistChange"
+                      @close-popup="isCustListShow = false"
+                      labelKey="cs_name"
+                      valueKey="customerid">
+            <cell slot="content" title="选择客户" @click.native="isCustListShow=true" :value="formData.customer" is-link></cell>
+      </PopupCustlist>
+
+      <PopupChecklist class="checkBox"
+                      :optionList="radioList"
+                      :isPopupShow="isCheckListShow"
+                      @on-change="handlePopupChecklistChange"
+                      @close-popup="isCheckListShow = false"
+                      labelKey="name"
+                      valueKey="tscidId">
+            <cell slot="content" title="选择联系人" @click.native="isCheckListShow=true" :value="formData.toucherName" is-link></cell>
+      </PopupChecklist>
+
+
+      <PopupMap class="checkBox"
+                      :isPopupShow="isMapShow"
+                      @on-submit="handlePopupMapCheck"
+                      @close-popup="isMapShow = false"
+                      labelKey="name"
+                      valueKey="rciId">
+            <cell class="test" slot="content" title="签到位置" @click.native="isMapShow=true" :value="formData.address" value-align="left" is-link></cell>
+      </PopupMap>
+      <cell @click.native="uploadImg" title="上传图片" is-link></cell>
+      <div style="padding:0 15px;">
+        <div class="previewer-sign-div" v-for="(it, idx) in previewerImages" :key="idx">
+          <img class="previewer-sign-img" :src="it.src" @click="show(idx)">
+          <span class="sign-img-delete" @click="deleteSignImage(idx)"><i class="iconfont">&#xe601;</i></span>
+        </div>
+        <div v-transfer-dom>
+          <previewer :list="previewerImages" ref="previewer"></previewer>
+        </div>
+      </div>
+      <x-textarea :max="500" placeholder="签到内容" v-model="formData.info"></x-textarea>
+      <cell title="按住录音" @touchstart.native="handleStartRecord" @touchend.native="handleStopRecord"></cell>
+      <div class="target-info" v-if="formData.record!=''">
+        <i class="iconfont">&#xe687;</i>
+        <div class="record-block" @click="handlePlayVoice(localId)"><i class="iconfont">&#xe600;</i></div>
+        {{formData.record_len}}"
+        <x-icon class="icon-close" type="ios-close-empty" @click.native="formData.record=''"></x-icon>
+      </div>
+      <x-button class="bottom-btn"
+              type="primary"
+              @click.native="handleSubmit">保存</x-button>
     </group>
   </div>
 </template>
 
 <script>
 import api from "@/api/sign";
-import wechat from "@/api/wechat";
+// import wechat from "@/api/wechat";
 import moment from "moment";
+import PopupChecklist from "@/components/PopupChecklist";
+import PopupCustlist from "@/components/PopupCustlist";
+import PopupMap from "@/components/PopupMap";
+import { wxChooseImage, getAllLocalImgData, uploadAllImg } from "@/util/wxUtil";
 
 import {
   Group,
@@ -39,7 +83,9 @@ import {
   XInput,
   XTextarea,
   XAddress,
-  ChinaAddressV4Data
+  ChinaAddressV4Data,
+  Previewer,
+  TransferDom
 } from "vux";
 export default {
   name: "SignForm",
@@ -52,27 +98,72 @@ export default {
     CellFormPreview,
     XInput,
     XTextarea,
-    XAddress
+    XAddress,
+    PopupChecklist,
+    PopupCustlist,
+    PopupMap,
+    Previewer
+  },
+  directives: {
+    TransferDom
   },
   data() {
-    return { 
-      addressData: ChinaAddressV4Data,
+    return {
+      addresssData: ChinaAddressV4Data,
+      isCheckListShow:false,
+      isCustListShow:false,
+      isMapShow:false,
+      radioCustList: [],
+      radioList: [],
+      time: moment().format('YYYY-MM-DD HH:mm'),
+      mapShow: false,
+      previewerImages: [],
+      penddingImgServerIds: [],
+      lat:'',
+      lng:'',
+      localId: '',//录音id
+      startRecordTimeStamp:0,
+      endRecordTimeStamp:0,
+      userAgentComefrom:'',
       formData: {
-        time: moment().format('YYYY-MM-DD HH:mm'),
-        info: '',
-        latitude: 0,
-        longitude: 0,
-        name: '',
+        lat: '30.2910480267',
+        lon: '120.1261552476',
         address: '',
-        images: ['/static/images/head.jpg','/static/images/head.jpg'],
-        localId: ''
+        customerid: '',
+        customer: '',
+        toucherid: '',
+        toucherName: '',
+        info: '',
+        comefrom: '企业微信',
+        pic: '',
+        record: '',
+        record_len: ''
       },
       // recordButton: true
     };
   },
   methods: {
-    handleClick() {
-      
+    show (curPicIndex) {
+      // console.log(this.$refs.previewer)
+      // console.log(curItemIndex,curPicIndex)
+
+      this.$refs.previewer.show(curPicIndex)
+    },
+    handleSubmit() {
+      console.log(this.penddingImgServerIds)
+      this.formData.pic = this.penddingImgServerIds.join()
+      if(this.formData.info == ''){
+        this.formData.info = '外勤签到'
+      }
+      api.fetchAddSign(this.formData).then((res)=>{
+        if(res.data.status){
+          if (this.$route.query.goindex === 'true') {
+            this.$router.push('/')
+          } else {
+            this.$router.back(-1)
+          }
+        }
+      })
     },
     onShadowChange(ids,names) {
       console.log(ids,names)
@@ -83,27 +174,9 @@ export default {
     logShow (str) {
       console.log('on-show')
     },
-    handleLocation(){
-      wx.getLocation({
-          type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
-          success: function (res) {
-              var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
-              var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
-              var speed = res.speed; // 速度，以米/每秒计
-              var accuracy = res.accuracy; // 位置精度
-
-              wx.openLocation({
-                  latitude: latitude, // 纬度，浮点数，范围为90 ~ -90
-                  longitude: longitude, // 经度，浮点数，范围为180 ~ -180。
-                  // name: '企蜂通信', // 位置名
-                  // address: '翠柏路7号电子商务产业园', // 地址详情说明
-                  scale: 1, // 地图缩放级别,整形值,范围从1~28。默认为16
-              });
-          }
-      });
-    },
     handleStartRecord() {
       var that = this
+      that.startRecordTimeStamp = new Date().getTime()
       wx.startRecord({
         success: function(res) {
           var tempFilePath = res.tempFilePath 
@@ -114,14 +187,24 @@ export default {
           alert('录音失败')
         }
       });
+
+      wx.onVoiceRecordEnd({
+          // 录音时间超过一分钟没有停止的时候会执行 complete 回调
+          complete: function (res) {
+              var localId = res.localId;
+              that.handleUploadVoice(localId,60)
+          }
+      });
     },
     handleStopRecord() {
       var that = this
+      that.endRecordTimeStamp = new Date().getTime()
       wx.stopRecord({
           success: function (res) {
               var localId = res.localId;
-              that.formData.localId = localId
-              alert(localId)
+              that.localId = localId
+              // alert(localId)
+              that.handleUploadVoice(localId)
           }
       });
     },
@@ -130,103 +213,192 @@ export default {
           localId: localId // 需要播放的音频的本地ID，由stopRecord接口获得
       });
     },
-    handleUpload() {
-      
+    handleUploadVoice(localId,timelength) {
       var that = this;
-      this.formData.images = ['/static/images/head.jpg','/static/images/head.jpg','/static/images/head.jpg','/static/images/head.jpg']
-      wx.chooseImage({
-        count: 2, // 默认9
-        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
-        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
-        defaultCameraMode: "batch", //表示进入拍照界面的默认模式，目前有normal与batch两种选择，normal表示普通单拍模式，batch表示连拍模式，不传该参数则为normal模式。（注：用户进入拍照界面仍然可自由切换两种模式）
-        success: function (res) {
-            var localIds = res.localIds; // 返回选定照片的本地ID列表，
-                    // andriod中localId可以作为img标签的src属性显示图片；
-                    // 而在IOS中需通过上面的接口getLocalImgData获取图片base64数据，从而用于img标签的显示
-            var iosImagesArr = []
-            localIds.map((item)=>{
-              wx.getLocalImgData({
-                  localId: item, // 图片的localID
-                  success: function (res) {
-                      var localData = res.localData; // localData是图片的base64数据，可以用img标签显示
-                      iosImagesArr.push(localData)
-                  }
-              });
-            })
-            that.formData.images = iosImagesArr
-            // alert(that.formData.images)
-        }
-      });
-    },
-    handleSelectEnterpriseContact() {
-      var that = this;
-      wx.invoke("selectEnterpriseContact", {
-                "fromDepartmentId": -1,// 必填，表示打开的通讯录从指定的部门开始展示，-1表示自己所在部门开始, 0表示从最上层开始
-                "mode": "multi",// 必填，选择模式，single表示单选，multi表示多选
-                "type": ["department", "user"],// 必填，选择限制类型，指定department、user中的一个或者多个
-                // "selectedDepartmentIds": ["2","3"],// 非必填，已选部门ID列表。用于多次选人时可重入，single模式下请勿填入多个id
-                // "selectedUserIds": ["lisi","lisi2"]// 非必填，已选用户ID列表。用于多次选人时可重入，single模式下请勿填入多个id
-        },function(res){
-                if (res.err_msg == "selectEnterpriseContact:ok")
-                {
-                        if(typeof res.result == 'string')
-                        {
-                                res.result = JSON.parse(res.result) //由于目前各个终端尚未完全兼容，需要开发者额外判断result类型以保证在各个终端的兼容性
-                        }
-                        var selectedDepartmentList = res.result.departmentList;// 已选的部门列表
-                        for (var i = 0; i < selectedDepartmentList.length; i++)
-                        {
-                                var department = selectedDepartmentList[i];
-                                var departmentId = department.id;// 已选的单个部门ID
-                                var departemntName = department.name;// 已选的单个部门名称
-                        }
-                        var selectedUserList = res.result.userList; // 已选的成员列表
-                        var userIdsList = [];
-                        for (var i = 0; i < selectedUserList.length; i++)
-                        {
-                                var user = selectedUserList[i];
-                                var userId = user.id; // 已选的单个成员ID
-                                var userName = user.name;// 已选的单个成员名称
-                                var userAvatar= user.avatar;// 已选的单个成员头像
-                                alert(userId)
-                                userIdsList.push(userId);
-                        }
-                        that.handleOpenEnterpriseChat(userIdsList)
-                }
-        }
-      );
-    },
-    handleOpenEnterpriseChat(userList) {
-      wx.openEnterpriseChat({
-        // 注意：userIds和externalUserIds至少选填一个，且userIds+openIds总数不能超过2000。
-          userIds: userList.join(';'),    //参与会话的企业成员列表，格式为userid1;userid2;...，用分号隔开。
-          // externalUserIds: 'wmEAlECwAAHrbWYDOK5u3Af13xlYDDNQ;wmEAlECwAAHrbWYDOK5u3Af13xlYDDNT', // 参与会话的外部联系人列表，格式为userId1;userId2;…，用分号隔开。
-          groupName: '',  // 必填，会话名称。单聊时该参数传入空字符串""即可。
-          success: function(res) {
-              // 回调
-          },
-          fail: function(res) {
-              if(res.errMsg.indexOf('function not exist') > -1){
-                  alert('版本过低请升级')
-              }
+      wx.uploadVoice({
+          localId: localId, // 需要上传的音频的本地ID，由stopRecord接口获得
+          isShowProgressTips: 1, // 默认为1，显示进度提示
+          success: function (res) {
+              var serverId = res.serverId; // 返回音频的服务器端ID
+              // alert(serverId)
+              that.formData.record = serverId;
+              that.formData.record_len = timelength?timelength:moment(that.endRecordTimeStamp-that.startRecordTimeStamp).format('s')
           }
       });
     },
-    handleSelectExternalContact() {
-      wx.invoke('selectExternalContact', {
-                        "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
-        }, function(res){
-        if(res.err_msg == "selectExternalContact:ok"){
-            userIds  = res.userIds ; //返回此次选择的外部联系人userId列表，数组类型
-        }else {
-            //错误处理
-        }
-     });
+    uploadImg() {
+      // wx.previewImage({
+      //   current: "http://www.w3school.com.cn/i/eg_mouse.jpg", // 当前显示图片的http链接
+      //   urls: [] // 需要预览的图片http链接列表
+      // });
+// console.log(this.userAgentComefrom)
+      let loadedImagesLength = this.previewerImages.length
+      if(loadedImagesLength >= 4){
+        return false;
+      } 
+      let count = 4-loadedImagesLength;
+      wxChooseImage(count)
+        .then(localIds => {
+          this.penddingImgIds = localIds;
+          if (this.userAgentComefrom != 'ios') {
+            //android直接使用localIds作为img src显示
+            localIds.map(item => {
+              this.previewerImages.push({'src':item})
+            })
+          }
+          return uploadAllImg(this.penddingImgIds);
+        })
+        .then(serverIds => {
+          this.penddingImgServerIds = serverIds;
+          if (this.userAgentComefrom == 'ios') {
+            //IOS下 src base64显示
+            return getAllLocalImgData(this.penddingImgIds);
+          }
+          return;
+        })
+        .then(LocalImgData => {
+          LocalImgData.map(item => {
+            this.previewerImages.push({'src':item})
+          })
+        })
+        .catch(e => {});
+    },
+    getDevicesInfo(){
+      let ua = navigator.userAgent.toLowerCase()
+      if (ua.indexOf('andriod') > -1) {
+        this.userAgentComefrom = 'andriod'
+      }else if(/iphone|ipad/i.test(ua)){
+        this.userAgentComefrom = 'ios'
+      }else{
+        this.userAgentComefrom = 'pc端'
+      }
+    },
+    handlePopupChecklistChange(val) {
+      this.formData.toucherid = val.value.length>0?val.value.join():''
+      this.formData.toucherName = val.label.length>0?val.label.join():''
+    },
+    handlePopupCustlistChange(val) {
+      this.formData.customerid = val.value
+      this.formData.customer = val.label
+    },
+    handlePopupMapCheck(val) {
+      console.log("handlePopupMapCheck",val)
+      this.formData.address = val.address
+      this.formData.lat = val.point.lat
+      this.formData.lon = val.point.lng
+    },
+    getLocationpoint() {
+      let self = this
+      if (navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              let latitude = position.coords.latitude;//获取纬度
+              let longitude = position.coords.longitude;//获取经度
+              self.formData.lat = latitude
+              self.formData.lon = longitude
+              self.lat = latitude
+              self.lng = longitude
+            },
+            function(err){
+              alert(err.message)
+              console.warn(`ERROR(${err.code}): ${err.message}`);
+            }
+          );
+      }else{
+          alert("不支持定位功能");
+      }
+    },
+    getFetchNearCustList() {
+      api.fetchNearCustList(
+        {"lat":this.formData.lat,"lon":this.formData.lon}
+      ).then((res)=>{
+        this.radioCustList = res.data.result.nearCustomers
+      })
+    },
+    deleteSignImage(index) {
+      this.previewerImages.splice(index,1)
+      this.penddingImgServerIds.splice(index,1)
+      this.formData.pic = this.penddingImgServerIds.join()
     }
   },
-  mounted() {}
+  mounted() {
+    this.getDevicesInfo()
+    this.getLocationpoint()
+    // this.getFetchNearCustList()
+
+    api.fetchLinkManList().then((res)=>{
+      if(res.data.resultCode == 1){
+        this.radioList = res.data.result.list
+        // console.log(this.radioList)
+      }
+    })
+
+  },
+  watch: {
+    lat(curVal,oldVal){
+      this.getFetchNearCustList()
+    },
+    lng(curVal,oldVal){
+      this.getFetchNearCustList()
+    }
+  }
 };
 </script>
 <style lang="less" scoped>
+.sign-form {
+  .bottom-btn {
+    position: fixed;
+    bottom: 0;
+  }
+  .map {
+    width: 100%;
+    height: 400px;
+  }
+  .target-info {
+    color: #999;
+    font-size: 12px;
+    line-height: 2;
+    position: relative;
+    padding: 0 15px;
 
+    .icon-close {
+      position: absolute;
+      fill: #999;
+      right: 8px;
+      top: 4px;
+    }
+  }
+  .record-block {
+    width: 40%;
+    display: inline-block;
+    background-color: rgba(242, 242, 242, 1);
+  }
+  .previewer-sign-img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .previewer-sign-div {
+    width: 80px;
+    height: 80px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+
+    .sign-img-delete {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 20;
+      font-size: 16px;
+      line-height: 16px;
+      background-color: #fff;
+
+      .iconfont {
+        padding: 0;
+        color: gray;
+      }
+    }
+  }
+}
 </style>

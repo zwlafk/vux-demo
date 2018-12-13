@@ -31,7 +31,7 @@
         </div>
       </cell>
     </group>
-    <group>
+    <group class="importBtn">
       <x-button type="primary"
                 @click.native="handleBtnClick">导入</x-button>
     </group>
@@ -122,7 +122,10 @@ export default {
                       "filterType": 0, //0表示展示全部外部联系人列表，1表示仅展示未曾选择过的外部联系人。默认值为0；除了0与1，其他值非法。在企业微信2.4.22及以后版本支持该参数
       }, function(res){
       if(res.err_msg == "selectExternalContact:ok"){
-          userIds  = res.userIds ; //返回此次选择的外部联系人userId列表，数组类型
+          console.log(res)
+          // userIds  = res.userIds ; //返回此次选择的外部联系人userId列表，数组类型
+          // alert(userIds)
+          alert(this.$route.params)
           let params = {
             ...this.$route.params,
             userIdStr:userIds.join(",")
@@ -174,5 +177,10 @@ export default {
     text-decoration: underline;
     color:#17719f;
   }
+}
+.importBtn{
+  width: 100%;
+  position: fixed;
+  bottom: 0;
 }
 </style>

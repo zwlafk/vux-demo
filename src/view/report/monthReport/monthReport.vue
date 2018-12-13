@@ -21,7 +21,7 @@
         </div>
         <div>
             <!-- <leaderboard></leaderboard> -->
-              <monthwidth :wid="list[2]"></monthwidth>
+              <monthwidth :wid="list[2]" :contract="list[0]"></monthwidth>
         </div>
     </div>
     
@@ -103,30 +103,36 @@ export default {
      groupIds:{
       type:String,
       default:""
+    },
+    form_to_time:{
+      type:Array,
+      default:function(){
+        return []
+      }
     }
   },
   created() {
     let that = this;
     function getrank() {
       return axios.get("/report/business/rankCount",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'month',
         groupIds:that.groupIds,
       }});
     }
     function getyx() {
       return axios.get("/report/business/yxCount",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'month',
         groupIds:that.groupIds,
       }});
     }
     function getinfo() {
       return axios.get("/report/business/count",{params:{
-        fromDateStr:'2018-01-01',
-        toDateStr:'2018-09-13',
+        fromDateStr:that.form_to_time[0],
+        toDateStr:that.form_to_time[1],
         dateType:'month',
         groupIds:that.groupIds,
       }});

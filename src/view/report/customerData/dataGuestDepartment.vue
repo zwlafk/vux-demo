@@ -1,14 +1,23 @@
 <template>
   <div>
-      <div class="content">
-            <h2>客户分布</h2>
-            <div style="width:300px;">
+      <div class="content" style="padding-top:13px;">
+            <h2 >客户分布</h2>
+            <div style="width:300px;height:223px;" v-if="analysic.result.allNum!=0">
+                <div style="height:42px;"></div>
                 <div><span style="width:70px;display:inLine-block;">客户总数</span><span>{{analysic.result.allNum}}</span></div>
                 <div v-for="item in demo_data" :key="item.id" style="width:100%">
-                    <div><span style="width:70px;display:inLine-block;text-align:right;">{{item.name}}</span><div class="item" :style='{width:item.percent}'></div><span>{{item.num}}</span></div>
+                    <div style="width:100%"><span style="width:70px;display:inLine-block;text-align:right;">{{item.name}}</span><div class="item" :style='{width:item.percent}'></div><span>{{item.num}}</span></div>
                 </div>
             </div>
-            <!-- {{analysic}} -->
+            <div style="width:300px;height:223px;" v-if="analysic.result.allNum==0">
+                <div style="height:42px;"></div>
+                <div><span style="width:70px;display:inLine-block;">客户总数</span><span>0</span></div>
+                <div v-for="item in demo_data" :key="item.id" style="width:100%">
+                    <div style="width:100%"><span style="width:70px;display:inLine-block;text-align:right;">{{item.name}}</span><div class="item" :style='{width:0}'></div><span>{{item.num}}</span></div>
+                </div>
+            </div>
+            <!-- {{analysic.result.allNum}} -->
+            <!-- {{demo_data}} -->
       </div>
   </div>
 </template>
@@ -34,7 +43,7 @@ export default {
           default:function(){
               return {
                   result:{
-                      allNum:""
+                      allNum:"0"
                   }
               }
           }
@@ -43,6 +52,7 @@ export default {
   computed:{
       demo_data:function(){
           let arr = this.analysic.result
+          console.log(arr,"sbmao")
           let arr1 = {}
           let arr2 = {}
           let arr3 = {}
@@ -77,6 +87,8 @@ export default {
                     return value2 - value1;
                 }   
             } 
+          console.log(arrO,"sbmao1")
+
           return (arrO.sort(compare('num')))
      
         

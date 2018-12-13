@@ -15,7 +15,11 @@ export default [
   {
     path: '/client', component: ClientWrapper,
     children: [
-      { path: '', name: 'ClientList', component: ClientList },
+      { path: '', name: 'ClientList', component: ClientList , beforeEnter: (to, from, next) => {
+        document.title = "我的客户"
+        next()
+      }
+    },
       { path: 'add', name: 'ClientAddForm', component: ClientForm },
       { path: ':custId', name: 'ClientPreview', component: ClientPreview, },
       { path: ':custId/detail', name: 'ClientDetail', component: ClientDetail },

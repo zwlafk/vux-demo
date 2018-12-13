@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import { ToastPlugin, LoadingPlugin, TransferDom, ConfirmPlugin,AlertPlugin } from 'vux'
+import { ToastPlugin, LoadingPlugin, TransferDom, ConfirmPlugin, AlertPlugin } from 'vux'
 import './api'
 import BaiduMap from 'vue-baidu-map'
 import moment from "moment";
-
+import store from './store'
+import { formatSeconds } from '@/util'
 import '@/setup'
 
 
@@ -16,7 +17,6 @@ Vue.use(ConfirmPlugin)
 Vue.use(LoadingPlugin)
 Vue.use(ToastPlugin)
 Vue.use(BaiduMap, {
-  // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
   ak: '9DaedVFPZNEutBncHGKa8kQ5YBBS9MWM'
 })
 Vue.directive('transfer-dom', TransferDom)
@@ -28,10 +28,13 @@ Vue.filter('dateFormat', function (time, format = "YYYY-MM-DD HH:mm") {
   return moment(time).format(format);
 })
 
+Vue.filter('formatSeconds', formatSeconds)
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

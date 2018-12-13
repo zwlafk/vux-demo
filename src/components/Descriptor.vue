@@ -3,7 +3,8 @@
     <dl v-for="(item,index) in dataList"
         :key="index">
       <dt>{{item.key|transKey(dataMapper)}}</dt>
-      <dd v-if="item.key=='label'" style="display: flex;flex-wrap: wrap;padding-left: 0;">
+      <dd v-if="item.key=='label'"
+          style="display: flex;flex-wrap: wrap;padding-left: 0;">
         <span style="flex:0 0 33.33%"
               v-for="(item,index) in item.value.split('#')"
               v-if="index<9"
@@ -66,20 +67,28 @@ export default {
           return moment(value).format("YYYY-MM-DD HH:mm");
         },
         sale_status(value) {
+          // 1-待分配，2-资源，3-意向客户，4-公海客户，5-资源回收站，6-签约客户，7-沉默客户，8-流失客户'
+
           let mapper = {
-            1: "意向客户",
-            2: "签约客户"
+            1: "待分配",
+            2: "资源",
+            3: "意向客户",
+            4: "公海客户",
+            5: "资源回收站",
+            6: "签约客户",
+            7: "沉默客户",
+            8: "流失客户"
           };
           return mapper[value];
         },
-        type(value) {
-          // 0.企业客户；1.个人客户）
-          let mapper = {
-            0: "企业客户",
-            1: "个人客户"
-          };
-          return mapper[value];
-        }
+        // type(value) {
+        //   // 0.企业客户；1.个人客户）
+        //   let mapper = {
+        //     0: "企业客户",
+        //     1: "个人客户"
+        //   };
+        //   return mapper[value];
+        // }
       };
       if (todoKey[item.key]) return todoKey[item.key](item.value);
       return item.value;

@@ -1,12 +1,12 @@
 <template>
-  <div class="followlist-wrapper">
+  <div class="commentlist-wrapper">
 
     <group>
       <template v-for="item in dataList">
-        <cell-box class="followlist-item"
+        <cell-box class="commentlist-item"
                   :key="item.id">
-          <div class="followlist-item-title">{{item.nickname}} {{item.time|dateFormat}}</div>
-          <div class="followlist-item-content">{{item.info}}</div>
+          <div class="commentlist-item-title">{{item.nickname}} {{item.time|dateFormat}}</div>
+          <div class="commentlist-item-content">{{item.info}}</div>
         </cell-box>
       </template>
     </group>
@@ -65,8 +65,12 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-.followlist-wrapper {
+.commentlist-wrapper {
   min-height: 100%;
+  .commentlist-item-title{
+    color: #8e8e8e;
+    font-size: 14px;
+  }
   .vux-cell-box {
     flex-direction: column;
     align-items: flex-start;

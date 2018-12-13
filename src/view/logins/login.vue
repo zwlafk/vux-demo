@@ -20,7 +20,6 @@
         <x-button class="btn" type="button" @click.native="homePage" :disabled="user==''||password==''">登录</x-button>
       </group>
     </div>
-
   </div>
 </template>
 <script>
@@ -69,7 +68,7 @@ export default {
         that.$router.push({name:'homePage'})
       })
       .catch(function (error) {
-         console.log('error='+error);
+         console.log('error='+error); 
       });
     },
   },
